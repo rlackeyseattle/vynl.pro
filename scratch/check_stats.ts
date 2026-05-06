@@ -1,9 +1,21 @@
-import { prisma } from "../src/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
-async function checkData() {
-  const venues = await prisma.venueProfile.count();
-  const bands = await prisma.bandProfile.count();
-  console.log(`📊 Database Stats:\nVenues: ${venues}\nBands: ${bands}`);
+const prisma = new PrismaClient();
+
+async function checkStats() {
+  const venueCount = await prisma.venueProfile.count();
+  const bandCount = await prisma.bandProfile.count();
+  const resourceCount = await prisma.musicResource.count();
+  const userCount = await prisma.user.count();
+
+  console.log("\n📊 THE CIRCUIT PULSE:");
+  console.log(`- Verified Venues:   ${venueCount}`);
+  console.log(`- Active Artists:    ${bandCount}`);
+  console.log(`- Industry Hubs:     ${resourceCount}`);
+  console.log(`- Total Records:     ${venueCount + bandCount + resourceCount}`);
+  console.log(`- Registered Users:  ${userCount}`);
+  
+  process.exit(0);
 }
 
-checkData().catch(console.error);
+checkStats();

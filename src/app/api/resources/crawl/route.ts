@@ -14,14 +14,23 @@ export async function POST(req: Request) {
     Return a JSON object with: name, type, address, latitude, longitude, phone, email, website, description, services, rates, brands.
     Ensure latitude and longitude are accurate.`;
 
+    console.log(`📡 [CRAWL] Starting Resource Crawl (${type}) for: ${query}`);
     const resourceData = await callGrok(prompt);
+    console.log(`📡 [CRAWL] Grok Result for ${query}:`, resourceData?.name);
 
+    if (!resourceData || !resourceData.name) {
+      console.error(`❌ [CRAWL] Failed to extract resource data for: ${query}`);
+      return NextResponse.json({ error: "Could not crawl resource data" }, { status: 500 });
+    }
+
+    console.log(`📡 [CRAWL] Syncing MusicResource: ${resourceData.name}`);
     const resource = await prisma.musicResource.upsert({
       where: { name: resourceData.name },
       update: { ...resourceData, lastCrawledAt: new Date() },
       create: { ...resourceData, lastCrawledAt: new Date() },
     });
 
+    console.log(`✅ [CRAWL] Successfully synced Resource: ${resourceData.name}`);
     return NextResponse.json({ resource });
   } catch (error) {
     console.error("Resource Crawl Error:", error);

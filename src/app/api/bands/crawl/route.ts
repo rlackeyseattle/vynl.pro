@@ -10,15 +10,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
+    console.log(`📡 [CRAWL] Starting Band Crawl for: ${query}`);
     const bandData = await crawlBandIntelligence(query);
+    console.log(`📡 [CRAWL] Grok Result for ${query}:`, bandData?.name);
 
-    if (!bandData) {
+    if (!bandData || !bandData.name) {
+      console.error(`❌ [CRAWL] Failed to extract band data for: ${query}`);
       return NextResponse.json({ error: "Could not crawl band data" }, { status: 500 });
     }
 
-    // Bands need a User record first in this schema
     const email = `${bandData.name.toLowerCase().replace(/ /g, '')}@vynl.pro`;
     
+    console.log(`📡 [CRAWL] Syncing User: ${email}`);
     const user = await prisma.user.upsert({
       where: { email },
       update: { name: bandData.name },
@@ -29,23 +32,28 @@ export async function POST(req: Request) {
       }
     });
 
-    const { name, ...profileData } = bandData;
+    const { name, members, ...profileData } = bandData;
+    const membersString = Array.isArray(members) ? members.join(", ") : members;
 
+    console.log(`📡 [CRAWL] Syncing BandProfile for User: ${user.id}`);
     const band = await prisma.bandProfile.upsert({
       where: { userId: user.id },
       update: {
         ...profileData,
+        members: membersString,
         lastCrawledAt: new Date(),
         lastGigDate: bandData.lastGigDate ? new Date(bandData.lastGigDate) : null,
       },
       create: {
         ...profileData,
         userId: user.id,
+        members: membersString,
         lastCrawledAt: new Date(),
         lastGigDate: bandData.lastGigDate ? new Date(bandData.lastGigDate) : null,
       },
     });
 
+    console.log(`✅ [CRAWL] Successfully synced Band: ${bandData.name}`);
     return NextResponse.json(band);
   } catch (error) {
     console.error("Band Crawl API Error:", error);
