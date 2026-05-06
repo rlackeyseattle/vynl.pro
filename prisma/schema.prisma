@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums removed as SQLite doesn't support them natively; fields already use Strings.
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  role          String    @default("BAND") // "BAND" or "VENUE"
+  name          String?
+  zip           String?
+  bio           String?
+  socialLinks   String?   
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  bandProfile   BandProfile?
+  venueProfile  VenueProfile?
+  
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+}
+
+model BandProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  genre           String?
+  yearsPerforming Int?
+  members         String?  
+  coverOrOriginal String?  // "COVER", "ORIGINAL", "DJ", "KARAOKE"
+  bandType        String?  // Detailed type
+  
+  // Geospatial
+  latitude        Float?
+  longitude       Float?
+  location        String?  // City, State
+  
+  // Activity
+  activeStatus    Boolean  @default(true)
+  lastGigDate     DateTime?
+  
+  headerImage     String?
+  design1Image    String?
+  design2Image    String?
+  
+  tracks          Track[]
+  videos          Video[]
+  storeItems      StoreItem[]
+  events          Event[]
+
+  lastCrawledAt   DateTime?
+}
+
+model VenueProfile {
+  id              String   @id @default(cuid())
+  userId          String?  @unique
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String   @unique
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  
+  phone           String?
+  bookingEmail    String?
+  contactName     String?
+  website         String?
+  
+  venueType       String?  // "BAR", "CLUB", "STADIUM", etc.
+  ageRequirement  String? 
+  averagePay      String?
+  coverCost       String?
+  
+  openDates       String? // Summary of upcoming availability
+  bookingHistory  String? // Kinds of bands they book
+  
+  claimed         Boolean  @default(false)
+  lastCrawledAt   DateTime?
+  
+  events          Event[]
+}
+
+model Track {
+  id            String   @id @default(cuid())
+  bandId        String
+  band          BandProfile @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  title         String
+  url           String
+  albumArt      String?
+  isDownloadable Boolean @default(false)
+  price         Float?
+  order         Int      @default(0)
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  bandId        String
+  band          BandProfile @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  title         String
+  url           String   
+}
+
+model StoreItem {
+  id            String   @id @default(cuid())
+  bandId        String
+  band          BandProfile @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  price         Float
+  image         String?
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  bandId        String?
+  band          BandProfile? @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  venueId       String?
+  venue         VenueProfile? @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  
+  date          DateTime
+  status        String @default("AVAILABLE") // "AVAILABLE" or "BOOKED"
+  compensation  String? 
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  senderId      String
+  sender        User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId    String
+  receiver      User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content       String
+  createdAt     DateTime @default(now())
+}
+
+model MusicResource {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  type            String   // "STUDIO", "REHEARSAL", "SHOP"
+  
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  
+  phone           String?
+  email           String?
+  website         String?
+  
+  // Specific metadata
+  description     String?
+  services        String?  // e.g., "Mixing, Mastering, Gear Rental"
+  rates           String?  // e.g., "$50/hr"
+  brands          String?  // For shops: "Fender, Gibson, etc."
+  
+  lastCrawledAt   DateTime?
+}
