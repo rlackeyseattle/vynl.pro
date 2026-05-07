@@ -107,7 +107,7 @@ export default function MapPage() {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-black mb-1 flex items-center gap-2 tracking-tighter text-white">
-              <Music className="text-pink-500" /> THE CIRCUIT
+              <Music className="text-pink-500" /> THE CIRCUIT // LIVE 2026
             </h2>
             <div className="flex items-center gap-2">
               <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">National Booking Network</p>
