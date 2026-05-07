@@ -26,7 +26,10 @@ export async function GET() {
 
     return NextResponse.json({ venues, bands, resources });
   } catch (error) {
-    console.error("Failed to fetch map data:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("CRITICAL: Map Data API Failure:", error);
+    return NextResponse.json({ 
+      error: "Failed to fetch map data", 
+      details: error instanceof Error ? error.message : "Unknown error" 
+    }, { status: 500 });
   }
 }

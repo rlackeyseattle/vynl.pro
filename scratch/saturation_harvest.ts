@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import * as dotenv from "dotenv";
 import { crawlBandIntelligence, crawlVenueIntelligence, callGrok } from "../src/lib/xai";
+
+// Force load the .env for cloud access
+dotenv.config();
 
 const prisma = new PrismaClient();
 
@@ -12,26 +16,23 @@ async function standaloneSaturate() {
 
   const categories = ["BAND", "STUDIO", "REHEARSAL", "SHOP", "VENUE"];
 
-  console.log(`🚀 STANDALONE CLOUD HARVEST INITIATED: 12 NATIONAL HUBS`);
+  console.log(`🚀 CLOUD HARVESTER v2.0 INITIATED`);
+  console.log(`📡 TARGET: Prisma Postgres Cloud`);
 
   for (const region of regions) {
-    console.log(`\n📍 REGION: ${region}`);
+    console.log(`\n📍 SCOUTING HUB: ${region}`);
     
     for (const type of categories) {
       try {
-        console.log(`   Scouting ${type}s...`);
-        const scoutPrompt = `List 10 famous or active ${type}s in ${region}. Return as a JSON array of strings: ["Name 1", "Name 2", ...]`;
+        const scoutPrompt = `List 5 famous or active ${type}s in ${region}. Return as a JSON array of strings: ["Name 1", "Name 2", ...]`;
         const targets = await callGrok(scoutPrompt);
 
-        if (!targets || !Array.isArray(targets)) {
-          console.log(`   - No ${type}s discovered.`);
-          continue;
-        }
+        if (!targets || !Array.isArray(targets)) continue;
 
-        console.log(`   - Found ${targets.length} targets. Injecting into cloud...`);
+        console.log(`   - Found ${targets.length} ${type}s. Injecting...`);
 
-        for (const name of targets.slice(0, 5)) {
-          console.log(`     -> Syncing: ${name}`);
+        for (const name of targets) {
+          console.log(`     [${type}] -> ${name}`);
           const query = `${name} ${region}`;
           
           if (type === "VENUE") {
