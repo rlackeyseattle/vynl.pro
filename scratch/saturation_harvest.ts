@@ -1,4 +1,9 @@
-async function saturateCircuit() {
+import { PrismaClient } from "@prisma/client";
+import { crawlBandIntelligence, crawlVenueIntelligence, callGrok } from "../src/lib/xai";
+
+const prisma = new PrismaClient();
+
+async function standaloneSaturate() {
   const regions = [
     "Austin, TX", "Nashville, TN", "Seattle, WA", "New Orleans, LA", 
     "Portland, OR", "Denver, CO", "Atlanta, GA", "Chicago, IL",
@@ -7,47 +12,73 @@ async function saturateCircuit() {
 
   const categories = ["BAND", "STUDIO", "REHEARSAL", "SHOP", "VENUE"];
 
-  console.log(`🚀 SATURATION MODE INITIATED: SYNCING 12 NATIONAL HUBS`);
+  console.log(`🚀 STANDALONE CLOUD HARVEST INITIATED: 12 NATIONAL HUBS`);
 
   for (const region of regions) {
-    console.log(`\n📍 SYNCING REGION: ${region}`);
+    console.log(`\n📍 REGION: ${region}`);
     
     for (const type of categories) {
       try {
-        console.log(`   - Stage Scout: Finding ${type}s...`);
-        const scoutRes = await fetch("http://localhost:3000/api/discovery/scout", {
-          method: "POST",
-          body: JSON.stringify({ region, type }),
-          headers: { "Content-Type": "application/json" }
-        });
-        const { targets } = await scoutRes.json();
+        console.log(`   Scouting ${type}s...`);
+        const scoutPrompt = `List 10 famous or active ${type}s in ${region}. Return as a JSON array of strings: ["Name 1", "Name 2", ...]`;
+        const targets = await callGrok(scoutPrompt);
 
-        if (!targets || targets.length === 0) {
-          console.log(`   - No ${type}s discovered in this region.`);
+        if (!targets || !Array.isArray(targets)) {
+          console.log(`   - No ${type}s discovered.`);
           continue;
         }
 
-        console.log(`   - Found ${targets.length} opportunities. Injecting...`);
+        console.log(`   - Found ${targets.length} targets. Injecting into cloud...`);
 
-        let endpoint = "/api/venues/crawl";
-        if (type === "BAND") endpoint = "/api/bands/crawl";
-        if (["STUDIO", "REHEARSAL", "SHOP"].includes(type)) endpoint = "/api/resources/crawl";
-
-        for (const name of targets.slice(0, 5)) { // Aggressive limit to prevent timeouts, moving fast
-          console.log(`     [${type}] Syncing: ${name}`);
-          await fetch(`http://localhost:3000${endpoint}`, {
-            method: "POST",
-            body: JSON.stringify({ query: `${name} ${region}`, type }),
-            headers: { "Content-Type": "application/json" }
-          });
+        for (const name of targets.slice(0, 5)) {
+          console.log(`     -> Syncing: ${name}`);
+          const query = `${name} ${region}`;
+          
+          if (type === "VENUE") {
+            const data = await crawlVenueIntelligence(query);
+            if (data) {
+              await prisma.venueProfile.upsert({
+                where: { name: data.name },
+                update: { ...data, lastCrawledAt: new Date() },
+                create: { ...data, lastCrawledAt: new Date() }
+              });
+            }
+          } else if (type === "BAND") {
+            const data = await crawlBandIntelligence(query);
+            if (data && data.name) {
+              const email = `${data.name.toLowerCase().replace(/ /g, '')}@vynl.pro`;
+              const user = await prisma.user.upsert({
+                where: { email },
+                update: { name: data.name },
+                create: { email, name: data.name, role: "BAND" }
+              });
+              const { name: bName, members, ...profileData } = data;
+              const membersString = Array.isArray(members) ? members.join(", ") : members;
+              await prisma.bandProfile.upsert({
+                where: { userId: user.id },
+                update: { ...profileData, members: membersString, lastCrawledAt: new Date(), lastGigDate: data.lastGigDate ? new Date(data.lastGigDate) : null },
+                create: { ...profileData, userId: user.id, members: membersString, lastCrawledAt: new Date(), lastGigDate: data.lastGigDate ? new Date(data.lastGigDate) : null }
+              });
+            }
+          } else {
+            const prompt = `Extract professional info for the music resource: "${query}" (Type: ${type}). Return a JSON object with: name, type, address, latitude, longitude, phone, email, website, description, services, rates, brands.`;
+            const data = await callGrok(prompt);
+            if (data && data.name) {
+              await prisma.musicResource.upsert({
+                where: { name: data.name },
+                update: { ...data, lastCrawledAt: new Date() },
+                create: { ...data, lastCrawledAt: new Date() }
+              });
+            }
+          }
         }
       } catch (e) {
-        console.error(`   ❌ Failed to sync ${type}s in ${region}`);
+        console.error(`   ❌ Failed to sync ${type} in ${region}:`, e.message);
       }
     }
   }
 
-  console.log("\n✅ SATURATION SWEEP COMPLETE.");
+  console.log("\n✅ CLOUD HARVEST COMPLETE.");
 }
 
-saturateCircuit();
+standaloneSaturate().catch(console.error);
