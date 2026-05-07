@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, X, Send } from "lucide-react";
+import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, X, Send, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,10 +32,11 @@ export default function MapPage() {
   const [bands, setBands] = useState([]);
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [showStats, setShowStats] = useState(false);
   const [routeNodes, setRouteNodes] = useState<any[]>([]);
-  const [showSignup, setShowSignup] = useState(true); // RE-ENABLED FOR PRE-RELEASE VIBE
+  const [showSignup, setShowSignup] = useState(true); 
   const [signupData, setSignupData] = useState({ name: "", email: "", zip: "", role: "BAND" });
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
@@ -47,11 +48,17 @@ export default function MapPage() {
     try {
       const res = await fetch("/api/map/data");
       const data = await res.json();
-      if (data.venues) setVenues(data.venues);
-      if (data.bands) setBands(data.bands);
-      if (data.resources) setResources(data.resources);
+      if (data.error) {
+        setError(data.details || data.error);
+      } else {
+        if (data.venues) setVenues(data.venues);
+        if (data.bands) setBands(data.bands);
+        if (data.resources) setResources(data.resources);
+        setError(null);
+      }
     } catch (error) {
       console.error("Error fetching map data:", error);
+      setError("Network or API Failure");
     } finally {
       setLoading(false);
     }
@@ -102,7 +109,10 @@ export default function MapPage() {
             <h2 className="text-3xl font-black mb-1 flex items-center gap-2 tracking-tighter text-white">
               <Music className="text-pink-500" /> THE CIRCUIT
             </h2>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">National Booking Network</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">National Booking Network</p>
+              <div className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-red-500 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+            </div>
           </div>
           {isLocal && (
             <button 
@@ -113,6 +123,13 @@ export default function MapPage() {
             </button>
           )}
         </div>
+
+        {error && (
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-[10px] text-red-400 font-mono space-y-2">
+            <p className="flex items-center gap-2 font-black uppercase tracking-widest"><AlertTriangle className="w-3 h-3" /> System Fault</p>
+            <p className="break-words">{error}</p>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {selectedVenue ? (
@@ -190,7 +207,7 @@ export default function MapPage() {
             <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="p-5 bg-pink-600/10 rounded-2xl border border-pink-500/20 text-[10px] text-pink-400 font-medium flex flex-col gap-3">
                 <p className="flex items-center gap-2 font-black uppercase tracking-widest text-white"><Zap className="w-3 h-3 text-pink-500" /> Pre-Release Access</p>
-                <p className="text-zinc-400">Join the national grid of performance venues. We are currently mapping high-density circuits across the U.S.</p>
+                <p className="text-zinc-400">The national grid is currently populating. Explore Nashville and New Orleans markers live.</p>
                 <button 
                   onClick={() => setShowSignup(true)}
                   className="py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-black uppercase transition-all shadow-lg shadow-pink-600/20"
