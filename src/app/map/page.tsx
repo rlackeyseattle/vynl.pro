@@ -90,6 +90,32 @@ export default function MapPage() {
     }
   };
 
+  const handleSendBooking = async () => {
+    if (!selectedVenue?.bookingEmail) return;
+    setSigningUp(true); // Re-using loading state for simplicity
+    try {
+      const res = await fetch("/api/booking/send", {
+        method: "POST",
+        body: JSON.stringify({
+          to: selectedVenue.bookingEmail,
+          subject: `Booking Inquiry: ${selectedVenue.name} - 2025/2026`,
+          body: `Hi ${selectedVenue.contactName || "Booking Manager"},\n\nI'm looking to book a show at ${selectedVenue.name} in late 2025. We noticed you have some availability and love your focus on ${selectedVenue.bookingHistory?.split('.')[0]}.\n\nBest,\n[Your Name]`
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Booking Inquiry Sent Successfully!");
+      } else {
+        alert(`Failed to send: ${data.message || data.error}`);
+      }
+    } catch (err) {
+      console.error("Booking failed:", err);
+    } finally {
+      setSigningUp(false);
+    }
+  };
+
   const handleSelectVenue = (venue: any) => {
     setSelectedVenue(venue);
     if (!routeNodes.find(n => n.id === venue.id)) {
@@ -195,8 +221,11 @@ export default function MapPage() {
                           defaultValue={`Hi ${selectedVenue.contactName || "Booking Manager"},\n\nI'm looking to book a show at ${selectedVenue.name} in late 2025. We noticed you have some availability and love your focus on ${selectedVenue.bookingHistory?.split('.')[0]}.\n\nBest,\n[Your Name]`}
                         />
                       </div>
-                      <button className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white font-black uppercase text-[10px] rounded-xl transition-all shadow-lg shadow-pink-600/20">
-                        Send Booking Request
+                      <button 
+                        onClick={handleSendBooking}
+                        className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white font-black uppercase text-[10px] rounded-xl transition-all shadow-lg shadow-pink-600/20"
+                      >
+                        {signingUp ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Send Booking Request"}
                       </button>
                     </div>
                   </div>

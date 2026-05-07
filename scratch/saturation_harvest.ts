@@ -11,20 +11,24 @@ async function standaloneSaturate() {
   const regions = [
     "Austin, TX", "Nashville, TN", "Seattle, WA", "New Orleans, LA", 
     "Portland, OR", "Denver, CO", "Atlanta, GA", "Chicago, IL",
-    "San Francisco, CA", "Las Vegas, NV", "Miami, FL", "Brooklyn, NY"
+    "San Francisco, CA", "Las Vegas, NV", "Miami, FL", "Brooklyn, NY",
+    "Los Angeles, CA", "Memphis, TN", "Philadelphia, PA", "Boston, MA",
+    "Minneapolis, MN", "Detroit, MI", "Kansas City, MO", "Athens, GA"
   ];
 
-  const categories = ["BAND", "STUDIO", "REHEARSAL", "SHOP", "VENUE"];
+  // Prioritizing Studios and Rehearsals for this sweep
+  const categories = ["STUDIO", "REHEARSAL", "VENUE", "SHOP", "BAND"];
 
-  console.log(`🚀 CLOUD HARVESTER v2.0 INITIATED`);
-  console.log(`📡 TARGET: Prisma Postgres Cloud`);
+  console.log(`🚀 HUB SWEEP INITIATED: FOCUSING ON STUDIOS & REHEARSAL`);
+  console.log(`📡 TARGET: Prisma Postgres Cloud // 20 HUBs`);
 
   for (const region of regions) {
     console.log(`\n📍 SCOUTING HUB: ${region}`);
     
     for (const type of categories) {
       try {
-        const scoutPrompt = `List 5 famous or active ${type}s in ${region}. Return as a JSON array of strings: ["Name 1", "Name 2", ...]`;
+        console.log(`   Scouting ${type}s...`);
+        const scoutPrompt = `List 8 famous or active ${type === "STUDIO" ? "Recording Studios" : type === "REHEARSAL" ? "Rehearsal Spaces" : type}s in ${region}. Return as a JSON array of strings: ["Name 1", "Name 2", ...]`;
         const targets = await callGrok(scoutPrompt);
 
         if (!targets || !Array.isArray(targets)) continue;
@@ -62,13 +66,41 @@ async function standaloneSaturate() {
               });
             }
           } else {
-            const prompt = `Extract professional info for the music resource: "${query}" (Type: ${type}). Return a JSON object with: name, type, address, latitude, longitude, phone, email, website, description, services, rates, brands.`;
+            // Logic for STUDIO, REHEARSAL, SHOP
+            const prompt = `Extract professional info for the music resource: "${query}" (Type: ${type}). Return a JSON object with: name, type, address, latitude, longitude, phone, email, website, description, services, rates, brands. Ensure latitude and longitude are accurate.`;
             const data = await callGrok(prompt);
             if (data && data.name) {
               await prisma.musicResource.upsert({
                 where: { name: data.name },
-                update: { ...data, lastCrawledAt: new Date() },
-                create: { ...data, lastCrawledAt: new Date() }
+                update: { 
+                  address: data.address,
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  phone: data.phone,
+                  email: data.email,
+                  website: data.website,
+                  description: data.description,
+                  services: Array.isArray(data.services) ? data.services.join(", ") : data.services,
+                  rates: data.rates,
+                  brands: Array.isArray(data.brands) ? data.brands.join(", ") : data.brands,
+                  type, 
+                  lastCrawledAt: new Date() 
+                },
+                create: { 
+                  name: data.name,
+                  address: data.address,
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  phone: data.phone,
+                  email: data.email,
+                  website: data.website,
+                  description: data.description,
+                  services: Array.isArray(data.services) ? data.services.join(", ") : data.services,
+                  rates: data.rates,
+                  brands: Array.isArray(data.brands) ? data.brands.join(", ") : data.brands,
+                  type, 
+                  lastCrawledAt: new Date() 
+                }
               });
             }
           }
@@ -79,7 +111,7 @@ async function standaloneSaturate() {
     }
   }
 
-  console.log("\n✅ CLOUD HARVEST COMPLETE.");
+  console.log("\n✅ HUB SWEEP COMPLETE.");
 }
 
 standaloneSaturate().catch(console.error);
