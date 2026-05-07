@@ -32,16 +32,12 @@ export default function MapPage() {
   const [bands, setBands] = useState([]);
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
   const [radius, setRadius] = useState(50);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [showStats, setShowStats] = useState(false);
   const [routeNodes, setRouteNodes] = useState<any[]>([]);
-  const [showSignup, setShowSignup] = useState(true);
-  const [signupData, setSignupData] = useState({ name: "", email: "", zip: "", role: "BAND" });
-  const [signingUp, setSigningUp] = useState(false);
-  const [signedUp, setSignedUp] = useState(false);
+  const [showSignup, setShowSignup] = useState(false); // DISABLED POPUP
   const [activeTab, setActiveTab] = useState<"INFO" | "BOOKING">("INFO");
 
   const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -65,16 +61,6 @@ export default function MapPage() {
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSigningUp(true);
-    setTimeout(() => {
-      setSigningUp(false);
-      setSignedUp(true);
-      setTimeout(() => setShowSignup(false), 2000);
-    }, 1500);
-  };
 
   const handleSelectVenue = (venue: any) => {
     setSelectedVenue(venue);
@@ -182,20 +168,17 @@ export default function MapPage() {
           ) : (
             <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="p-5 bg-pink-600/10 rounded-2xl border border-pink-500/20 text-[10px] text-pink-400 font-medium flex flex-col gap-3">
-                <p className="flex items-center gap-2 font-black uppercase tracking-widest"><Zap className="w-3 h-3" /> Early Release Beta</p>
-                <p>Access the national grid of performance venues. We are currently mapping high-density circuits across the U.S.</p>
-                <button 
-                  onClick={() => setShowSignup(true)}
-                  className="py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-black uppercase transition-all shadow-lg shadow-pink-600/20"
-                >
-                  Join Waitlist
-                </button>
+                <p className="flex items-center gap-2 font-black uppercase tracking-widest text-white"><Zap className="w-3 h-3 text-pink-500" /> SYNCING THE NATION</p>
+                <p className="text-zinc-400">The Circuit is currently ingesting 10,000+ venues and artists. Explore the live grid below.</p>
+                <Link href="/contact" className="py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-zinc-300 font-black uppercase text-center transition-all">
+                  Contact Support
+                </Link>
               </div>
               
               {/* Route List Preview */}
               {routeNodes.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Your Circuit</h4>
+                  <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Your Tour Route</h4>
                   {routeNodes.map(node => (
                     <div key={node.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl flex justify-between items-center group">
                       <span className="text-[10px] font-bold text-zinc-300 uppercase">{node.name}</span>
@@ -236,44 +219,6 @@ export default function MapPage() {
         )}
 
         <TouringMap venues={venues} bands={bands} resources={resources} routeNodes={routeNodes} onSelectVenue={handleSelectVenue} isProduction={!isLocal} />
-        
-        {/* BETA SIGNUP OVERLAY */}
-        <AnimatePresence>
-          {showSignup && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[2000] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
-              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-md glass p-8 rounded-[32px] border border-zinc-800 bg-zinc-950/90 shadow-2xl relative overflow-hidden">
-                <button onClick={() => setShowSignup(false)} className="absolute top-6 right-6 p-2 text-zinc-500 hover:text-white"><X className="w-5 h-5" /></button>
-                <div className="text-center mb-8">
-                  <div className="inline-block p-3 bg-pink-600 rounded-2xl mb-4 shadow-xl shadow-pink-600/30">
-                    <Music className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-black text-white tracking-tighter uppercase mb-2">Join The Circuit</h3>
-                  <p className="text-zinc-500 text-sm font-medium">Early Release Beta • Launching Summer 2026</p>
-                </div>
-
-                {signedUp ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-                    <Zap className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                    <h4 className="text-xl font-black text-white uppercase">You're In!</h4>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <input required type="text" placeholder="Full Name" className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" />
-                    <input required type="email" placeholder="Email Address" className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" />
-                    <div className="grid grid-cols-2 gap-4">
-                      <input required type="text" placeholder="Zipcode" className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" />
-                      <select className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-sm text-white appearance-none">
-                        <option value="BAND">Artist / Band</option>
-                        <option value="VENUE">Music Venue</option>
-                      </select>
-                    </div>
-                    <button type="submit" className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white font-black uppercase rounded-2xl transition-all shadow-xl shadow-pink-600/30">Claim Access</button>
-                  </form>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
     </div>
   );
