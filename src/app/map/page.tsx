@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, X, Send, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 
 const TouringMap = dynamic(() => import("@/components/TouringMap"), { 
   ssr: false,
@@ -13,15 +13,25 @@ const TouringMap = dynamic(() => import("@/components/TouringMap"), {
   </div>
 });
 
-function Counter({ value, label, color }: { value: number, label: string, color: string }) {
+function AnimatedCounter({ value, label, color, icon: Icon }: { value: number, label: string, color: string, icon?: any }) {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, Math.round);
+
+  useEffect(() => {
+    const animation = animate(count, value, { duration: 1.5, ease: "easeOut" });
+    return animation.stop;
+  }, [value]);
+
   return (
-    <div className="flex flex-col items-center px-4 py-1 border-r border-zinc-800 last:border-r-0">
-      <motion.span 
-        key={value} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-        className={`text-xl font-black ${color} tabular-nums`}
-      >
-        {value.toLocaleString()}
-      </motion.span>
+    <div className="flex flex-col items-center px-4 py-1 border-r border-zinc-800/60 last:border-r-0 group">
+      <div className="flex items-center gap-1.5 mb-1">
+        {Icon && <Icon className={`w-3 h-3 ${color} opacity-60 group-hover:opacity-100 transition-opacity`} />}
+        <motion.span 
+          className={`text-xl font-black ${color} tabular-nums tracking-tighter`}
+        >
+          {rounded}
+        </motion.span>
+      </div>
       <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{label}</span>
     </div>
   );
@@ -124,20 +134,25 @@ export default function MapPage() {
   };
 
   const totalIntel = venues.length + bands.length + resources.length;
-  const showCounter = isLocal || totalIntel > 5000;
+  const showCounter = isLocal || totalIntel > 0;
+  
+  const studios = resources.filter((r: any) => r.type === 'STUDIO').length;
+  const rehearsals = resources.filter((r: any) => r.type === 'REHEARSAL').length;
+  const shops = resources.filter((r: any) => r.type === 'SHOP').length;
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden bg-zinc-950 font-sans relative">
+    <div className="h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden bg-[#030303] font-sans relative">
+
       {/* Sidebar */}
-      <aside className="w-full md:w-96 border-r border-zinc-800 p-6 space-y-8 overflow-y-auto custom-scrollbar bg-zinc-950/50 backdrop-blur-xl relative z-20">
+      <aside className="w-full md:w-96 border-r border-zinc-800/60 p-6 space-y-8 overflow-y-auto custom-scrollbar bg-[#050505]/95 backdrop-blur-2xl relative z-20 shadow-2xl">
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-black mb-1 flex items-center gap-2 tracking-tighter text-white">
-              <Music className="text-pink-500" /> THE CIRCUIT // LIVE 2026
+              <Music className="text-pink-500 w-6 h-6" /> THE CIRCUIT
             </h2>
             <div className="flex items-center gap-2">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">National Booking Network</p>
-              <div className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-red-500 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+              <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.25em]">Global Booking Intelligence</p>
+              <div className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-red-500 animate-pulse' : 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]'}`} />
             </div>
           </div>
           {isLocal && (
@@ -266,23 +281,20 @@ export default function MapPage() {
 
       {/* Map Main */}
       <main className="flex-1 relative overflow-hidden z-10">
-        {/* Conditional Circuit Pulse Counter */}
         {showCounter && (
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
-            <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass flex items-center bg-black/60 backdrop-blur-2xl border border-zinc-800 rounded-2xl px-6 py-3 shadow-[0_0_50px_rgba(0,0,0,0.5)] pointer-events-auto">
-              <div className="flex items-center gap-3 pr-6 border-r border-zinc-800">
-                <div className="p-2 bg-pink-500 rounded-lg shadow-lg shadow-pink-500/40">
-                  <Activity className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-black text-white tabular-nums tracking-tighter">{totalIntel.toLocaleString()}</span>
-                  <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Circuit Pulse</span>
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none w-full max-w-4xl px-4">
+            <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center bg-[#09090b]/80 backdrop-blur-3xl border border-zinc-800/50 rounded-2xl px-2 py-2 shadow-[0_16px_64px_rgba(0,0,0,0.8)] pointer-events-auto">
+              <div className="flex items-center gap-4 px-6 border-r border-zinc-800/60">
+                <div className="flex flex-col items-center">
+                  <AnimatedCounter value={totalIntel} label="Total Pulse" color="text-white" icon={Activity} />
                 </div>
               </div>
-              <div className="flex items-center">
-                <Counter value={venues.length} label="Venues" color="text-pink-500" />
-                <Counter value={bands.length} label="Artists" color="text-indigo-400" />
-                <Counter value={resources.length} label="Hubs" color="text-emerald-400" />
+              <div className="flex items-center px-2">
+                <AnimatedCounter value={venues.length} label="Venues" color="text-pink-500" icon={MapPin} />
+                <AnimatedCounter value={bands.length} label="Artists" color="text-indigo-400" icon={Users} />
+                {studios > 0 && <AnimatedCounter value={studios} label="Studios" color="text-emerald-400" icon={Mic2} />}
+                {rehearsals > 0 && <AnimatedCounter value={rehearsals} label="Rehearsal" color="text-orange-400" icon={Speaker} />}
+                {shops > 0 && <AnimatedCounter value={shops} label="Stores" color="text-purple-400" icon={Building2} />}
               </div>
             </motion.div>
           </div>

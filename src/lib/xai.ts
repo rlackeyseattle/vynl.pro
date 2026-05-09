@@ -94,3 +94,20 @@ export async function crawlBandIntelligence(query: string): Promise<BandData | n
     return null;
   }
 }
+
+export async function generateBookingEmail(band: any, venue: any, date: string): Promise<{ subject: string, body: string }> {
+  try {
+    const prompt = `Act as an expert booking agent for the band "${band.name}".
+    Draft a professional, personalized outreach email to the venue "${venue.name}" for a gig on ${date}.
+    Band Info: ${JSON.stringify(band)}
+    Venue Info: ${JSON.stringify(venue)}
+    
+    The tone should be "Casual & Professional". Include links to their tracks and mentions of their genre matching the venue's history.
+    Return a JSON object with "subject" and "body" keys.`;
+    
+    return await callGrok(prompt);
+  } catch (error) {
+    console.error("Email Generation Failure:", error);
+    return { subject: `Booking Inquiry: ${band.name}`, body: "Hello, we are interested in booking a show at your venue." };
+  }
+}

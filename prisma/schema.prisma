@@ -26,6 +26,8 @@ model User {
   
   sentMessages      Message[] @relation("SentMessages")
   receivedMessages  Message[] @relation("ReceivedMessages")
+  
+  bookingCampaigns  BookingCampaign[]
 }
 
 model BandProfile {
@@ -87,6 +89,7 @@ model VenueProfile {
   lastCrawledAt   DateTime?
   
   events          Event[]
+  bookingAttempts BookingAttempt[]
 }
 
 model Track {
@@ -161,4 +164,34 @@ model MusicResource {
   brands          String?  // For shops: "Fender, Gibson, etc."
   
   lastCrawledAt   DateTime?
+}
+
+model BookingCampaign {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  targetDates     String   // Serialized dates array
+  maxRadius       Int      // in miles
+  minCompensation Float?
+  
+  status          String   @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED
+  attempts        BookingAttempt[]
+  
+  createdAt       DateTime @default(now())
+}
+
+model BookingAttempt {
+  id                String   @id @default(cuid())
+  campaignId        String
+  campaign          BookingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  venueId           String
+  venue             VenueProfile @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  
+  status            String   @default("PENDING") // PENDING, SENT, REPLIED, CONFIRMED, DECLINED
+  threadId          String?  // For email threading
+  
+  negotiationLog    String?  // AI's summary of the conversation
+  lastActivityAt    DateTime @default(now())
 }

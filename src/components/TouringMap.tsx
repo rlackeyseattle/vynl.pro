@@ -9,8 +9,8 @@ import { useEffect } from "react";
 
 const venueIcon = L.divIcon({
   className: "custom-div-icon",
-  html: `<div class="p-2 bg-pink-500 rounded-full border-2 border-white shadow-lg shadow-pink-500/50 flex items-center justify-center animate-pulse">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+  html: `<div class="p-2 bg-zinc-950/90 rounded-full border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.6)] flex items-center justify-center animate-pulse backdrop-blur-sm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
   </div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
@@ -18,8 +18,8 @@ const venueIcon = L.divIcon({
 
 const bandIcon = L.divIcon({
   className: "custom-div-icon",
-  html: `<div class="p-2 bg-indigo-500 rounded-full border-2 border-white shadow-lg shadow-indigo-500/50 flex items-center justify-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+  html: `<div class="p-2 bg-zinc-950/90 rounded-full border-2 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.6)] flex items-center justify-center backdrop-blur-sm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
   </div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
@@ -27,8 +27,8 @@ const bandIcon = L.divIcon({
 
 const studioIcon = L.divIcon({
   className: "custom-div-icon",
-  html: `<div class="p-2 bg-emerald-500 rounded-full border-2 border-white shadow-lg shadow-emerald-500/50 flex items-center justify-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg>
+  html: `<div class="p-2 bg-zinc-950/90 rounded-full border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)] flex items-center justify-center backdrop-blur-sm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg>
   </div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
@@ -36,8 +36,8 @@ const studioIcon = L.divIcon({
 
 const rehearsalIcon = L.divIcon({
   className: "custom-div-icon",
-  html: `<div class="p-2 bg-orange-500 rounded-full border-2 border-white shadow-lg shadow-orange-500/50 flex items-center justify-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>
+  html: `<div class="p-2 bg-zinc-950/90 rounded-full border-2 border-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.6)] flex items-center justify-center backdrop-blur-sm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>
   </div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
@@ -45,8 +45,8 @@ const rehearsalIcon = L.divIcon({
 
 const shopIcon = L.divIcon({
   className: "custom-div-icon",
-  html: `<div class="p-2 bg-purple-500 rounded-full border-2 border-white shadow-lg shadow-purple-500/50 flex items-center justify-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path><path d="m3 7 6 6-6 6"></path></svg>
+  html: `<div class="p-2 bg-zinc-950/90 rounded-full border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)] flex items-center justify-center backdrop-blur-sm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path><path d="m3 7 6 6-6 6"></path></svg>
   </div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
