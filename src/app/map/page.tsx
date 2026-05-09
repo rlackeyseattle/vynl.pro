@@ -448,7 +448,6 @@ export default function MapPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
     </div>
   );
 }
