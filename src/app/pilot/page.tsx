@@ -1,46 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Pilot.module.css";
 
 export default function PilotPage() {
   const [radius, setRadius] = useState(150);
   const [minPay, setMinPay] = useState(200);
   const [status, setStatus] = useState("IDLE");
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [negotiations, setNegotiations] = useState<any[]>([]);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
 
-  const addLog = (msg: string) => {
-    setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
-  };
+  // Poll for status every 5 seconds
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch("/api/pilot/status?userId=current-user-id");
+        const data = await res.json();
+        if (data.success) {
+          setLogs(data.logs);
+          setNegotiations(data.campaign?.attempts || []);
+          if (data.campaign) {
+            setCampaignId(data.campaign.id);
+            setStatus(data.campaign.status === "ACTIVE" ? "ACTIVE" : "IDLE");
+          }
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const launchPilot = async () => {
     setStatus("ACTIVE");
-    addLog("Initializing Vynl Pilot...");
     
     try {
       const res = await fetch("/api/pilot/campaign", {
         method: "POST",
         body: JSON.stringify({
-          userId: "current-user-id", // Should be fetched from session
+          userId: "current-user-id",
           targetDates: ["2026-06-12", "2026-06-13"],
           maxRadius: radius,
           minCompensation: minPay
         })
       });
       const data = await res.json();
-      addLog(`Campaign created. Found ${data.venuesFound} target venues.`);
+      setCampaignId(data.campaignId);
 
       // Trigger outreach
-      addLog("Starting automated outreach...");
-      const processRes = await fetch("/api/pilot/process", {
+      await fetch("/api/pilot/process", {
         method: "POST",
         body: JSON.stringify({ campaignId: data.campaignId })
       });
-      const processData = await processRes.json();
-      processData.results.forEach((r: any) => addLog(`Email sent to ${r.venue}`));
       
     } catch (error) {
-      addLog("Critical error during launch.");
+      console.error("Critical error during launch.", error);
       setStatus("IDLE");
     }
   };
@@ -57,7 +75,7 @@ export default function PilotPage() {
             className={status === "ACTIVE" ? styles.stopBtn : styles.startBtn}
             onClick={launchPilot}
           >
-            {status === "ACTIVE" ? "Pause Pilot" : "Launch Pilot"}
+            {status === "ACTIVE" ? "Pilot is Active" : "Launch Pilot"}
           </button>
         </div>
       </header>
@@ -108,32 +126,41 @@ export default function PilotPage() {
         <main className={styles.activity}>
           <div className={styles.activityHeader}>
             <h2 className={styles.panelTitle}>Active Negotiations</h2>
-            <span className={styles.pulse}></span>
+            {status === "ACTIVE" && <span className={styles.pulse}></span>}
           </div>
 
           <div className={styles.negotiationList}>
-            {mockNegotiations.map((n, i) => (
+            {negotiations.map((n, i) => (
               <div key={i} className={styles.negotiationCard}>
                 <div className={styles.cardInfo}>
-                  <h3>{n.venue}</h3>
-                  <span className={styles.date}>{n.date}</span>
+                  <h3>{n.venue.name}</h3>
+                  <span className={styles.date}>{n.venue.address || "Location TBD"}</span>
                 </div>
                 <div className={styles.cardStatus}>
                   <span className={styles[`status_${n.status.toLowerCase()}`]}>{n.status}</span>
-                  <p className={styles.lastMsg}>"{n.lastMsg}"</p>
+                  <p className={styles.lastMsg}>{n.negotiationLog?.split('\n').pop() || "Waiting for response..."}</p>
                 </div>
-                <button className={styles.viewBtn}>View Thread</button>
+                <button className={styles.viewBtn}>Manage</button>
               </div>
             ))}
+            {negotiations.length === 0 && (
+              <div className={styles.empty}>
+                No active negotiations. Launch the Pilot to begin outreach.
+              </div>
+            )}
           </div>
         </main>
       </div>
 
       {/* Internal Log Section */}
       <section className={styles.log}>
-        <h2 className={styles.panelTitle}>System Log (Internal)</h2>
+        <h2 className={styles.panelTitle}>System Intelligence (Internal)</h2>
         <div className={styles.logBox}>
-          {logs.map((log, i) => <p key={i}>{log}</p>)}
+          {logs.map((log, i) => (
+            <p key={i} className={styles[`log_${log.level.toLowerCase()}`]}>
+              [{new Date(log.createdAt).toLocaleTimeString()}] {log.message}
+            </p>
+          ))}
           {logs.length === 0 && <p>Pilot ready for takeoff...</p>}
         </div>
       </section>

@@ -23,3 +23,13 @@ export async function sendBookingEmail(to: string, subject: string, body: string
     return { success: false, error };
   }
 }
+export async function getReceivedEmail(id: string) {
+  try {
+    const { data, error } = await resend.emails.get(id);
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Fetch Inbound Failure:", error);
+    return null;
+  }
+}

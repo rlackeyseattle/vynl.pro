@@ -141,9 +141,72 @@ export default function MapPage() {
   const shops = resources.filter((r: any) => r.type === 'SHOP').length;
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden bg-[#030303] font-sans relative">
+    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-[#0a0a0f] font-sans relative">
+      {/* Top Stats Bar */}
+      {showCounter && (
+        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-4 z-20 relative">
+          {/* Global Reach Widget */}
+          <div className="glass bg-[#12121a]/90 backdrop-blur-3xl border border-pink-500/20 rounded-2xl p-5 shadow-[0_0_30px_rgba(236,72,153,0.05)] relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl"></div>
+            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 flex justify-between">
+              Global Reach <Globe className="w-3 h-3 text-cyan-400" />
+            </h3>
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 font-bold mb-1">LIVE VENUES</span>
+                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{venues.length}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 font-bold mb-1">ARTISTS</span>
+                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{bands.length}</span>
+              </div>
+            </div>
+          </div>
 
-      {/* Sidebar */}
+          {/* Industry Hubs Widget */}
+          <div className="glass bg-[#12121a]/90 backdrop-blur-3xl border border-orange-500/20 rounded-2xl p-5 shadow-[0_0_30px_rgba(249,115,22,0.05)] relative overflow-hidden">
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"></div>
+            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 flex justify-between">
+              Creative Infrastructure <Building2 className="w-3 h-3 text-orange-400" />
+            </h3>
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 font-bold mb-1">STUDIOS</span>
+                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{studios}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 font-bold mb-1">REHEARSAL</span>
+                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{rehearsals}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 font-bold mb-1">STORES</span>
+                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{shops}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Circuit Pulse Widget */}
+          <div className="glass bg-[#12121a]/90 backdrop-blur-3xl border border-indigo-500/20 rounded-2xl p-5 shadow-[0_0_30px_rgba(99,102,241,0.05)] relative overflow-hidden flex items-center justify-between">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/10 blur-3xl"></div>
+            <div className="relative z-10">
+              <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                Total Pulse <Activity className="w-3 h-3 text-indigo-400" />
+              </h3>
+              <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-400 tabular-nums tracking-tighter">
+                {totalIntel.toLocaleString()} Nodes
+              </span>
+            </div>
+            <div className="relative z-10 p-3 bg-indigo-500/10 rounded-xl">
+              <TrendingUp className="w-6 h-6 text-indigo-400" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        {/* Left Sidebar - Details & Booking */}
+
       <aside className="w-full md:w-96 border-r border-zinc-800/60 p-6 space-y-8 overflow-y-auto custom-scrollbar bg-[#050505]/95 backdrop-blur-2xl relative z-20 shadow-2xl">
         <div className="flex justify-between items-center">
           <div>
@@ -280,29 +343,49 @@ export default function MapPage() {
       </aside>
 
       {/* Map Main */}
-      <main className="flex-1 relative overflow-hidden z-10">
-        {showCounter && (
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none w-full max-w-4xl px-4">
-            <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center bg-[#09090b]/80 backdrop-blur-3xl border border-zinc-800/50 rounded-2xl px-2 py-2 shadow-[0_16px_64px_rgba(0,0,0,0.8)] pointer-events-auto">
-              <div className="flex items-center gap-4 px-6 border-r border-zinc-800/60">
-                <div className="flex flex-col items-center">
-                  <AnimatedCounter value={totalIntel} label="Total Pulse" color="text-white" icon={Activity} />
-                </div>
-              </div>
-              <div className="flex items-center px-2">
-                <AnimatedCounter value={venues.length} label="Venues" color="text-pink-500" icon={MapPin} />
-                <AnimatedCounter value={bands.length} label="Artists" color="text-indigo-400" icon={Users} />
-                {studios > 0 && <AnimatedCounter value={studios} label="Studios" color="text-emerald-400" icon={Mic2} />}
-                {rehearsals > 0 && <AnimatedCounter value={rehearsals} label="Rehearsal" color="text-orange-400" icon={Speaker} />}
-                {shops > 0 && <AnimatedCounter value={shops} label="Stores" color="text-purple-400" icon={Building2} />}
-              </div>
-            </motion.div>
-          </div>
-        )}
-
+      <main className="flex-1 relative overflow-hidden z-10 rounded-tr-3xl">
         <TouringMap venues={venues} bands={bands} resources={resources} routeNodes={routeNodes} onSelectVenue={handleSelectVenue} isProduction={!isLocal} />
+      </main>
 
-        {/* BETA SIGNUP OVERLAY */}
+      {/* Right Sidebar - Feed & Network */}
+      <aside className="hidden lg:flex w-80 border-l border-zinc-800/60 p-4 flex-col bg-[#050505]/95 backdrop-blur-2xl z-20">
+        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.25em] mb-4">Recent Network Activity</h3>
+        <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2">
+          {venues.slice(0, 5).map((v: any, i) => (
+            <div key={v.id || i} className="flex gap-3 items-start p-3 bg-[#12121a]/50 rounded-xl border border-zinc-800/40 hover:bg-[#12121a] transition-colors cursor-pointer" onClick={() => handleSelectVenue(v)}>
+              <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center shrink-0 border border-pink-500/30">
+                <MapPin className="w-3 h-3 text-pink-400" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white leading-tight">{v.name}</p>
+                <p className="text-[10px] text-zinc-500 mt-1">New venue synced in {v.address?.split(',')[0] || 'the network'}.</p>
+              </div>
+            </div>
+          ))}
+          {bands.slice(0, 3).map((b: any, i) => (
+            <div key={b.id || i} className="flex gap-3 items-start p-3 bg-[#12121a]/50 rounded-xl border border-zinc-800/40">
+              <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 border border-indigo-500/30">
+                <Users className="w-3 h-3 text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white leading-tight">{b.name}</p>
+                <p className="text-[10px] text-zinc-500 mt-1">Artist profile created ({b.genre || 'Various'}).</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-4 pt-4 border-t border-zinc-800/60">
+          <Link href="/messages" className="flex items-center justify-between p-3 bg-zinc-900 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-colors">
+            <span className="flex items-center gap-2"><Mail className="w-4 h-4 text-cyan-400" /> View Inbox (Local)</span>
+            <span className="bg-cyan-500 text-black px-1.5 rounded-md text-[9px]">Beta</span>
+          </Link>
+        </div>
+      </aside>
+      </div>
+
+      {/* BETA SIGNUP OVERLAY */}
+
         <AnimatePresence>
           {showSignup && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[2000] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
@@ -319,39 +402,48 @@ export default function MapPage() {
                 {signedUp ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
                     <Zap className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                    <h4 className="text-xl font-black text-white uppercase">You're In!</h4>
+                    <h4 className="text-xl font-black text-white uppercase">Profile Initialized!</h4>
+                    <p className="text-zinc-500 text-sm mt-2">Welcome to the Circuit.</p>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSignup} className="space-y-4">
+                  <form onSubmit={handleSignup} className="space-y-4 relative z-10">
                     <input 
-                      required type="text" placeholder="Full Name" 
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" 
+                      required type="text" placeholder="Your Name / Act Name" 
+                      className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:ring-2 focus:ring-cyan-500 outline-none backdrop-blur-sm" 
                       onChange={(e) => setSignupData({...signupData, name: e.target.value})}
                     />
                     <input 
                       required type="email" placeholder="Email Address" 
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" 
+                      className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:ring-2 focus:ring-cyan-500 outline-none backdrop-blur-sm" 
                       onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <input 
                         required type="text" placeholder="Zipcode" 
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white" 
+                        className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:ring-2 focus:ring-cyan-500 outline-none backdrop-blur-sm" 
                         onChange={(e) => setSignupData({...signupData, zip: e.target.value})}
                       />
                       <select 
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-sm text-white appearance-none"
+                        className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-4 py-4 text-sm text-white appearance-none focus:ring-2 focus:ring-cyan-500 outline-none backdrop-blur-sm"
                         onChange={(e) => setSignupData({...signupData, role: e.target.value})}
+                        defaultValue="BAND"
                       >
                         <option value="BAND">Artist / Band</option>
+                        <option value="FAN">Fan / Enthusiast</option>
                         <option value="VENUE">Music Venue</option>
+                        <option value="STUDIO">Recording Studio</option>
+                        <option value="REHEARSAL">Rehearsal Room</option>
+                        <option value="LABEL">Record Label</option>
+                        <option value="SHOP">Music Store</option>
                       </select>
                     </div>
-                    <button type="submit" disabled={signingUp} className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white font-black uppercase rounded-2xl transition-all shadow-xl shadow-pink-600/30">
-                      {signingUp ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Claim Access"}
+                    <button type="submit" disabled={signingUp} className="w-full py-4 bg-gradient-to-r from-cyan-500 via-indigo-500 to-magenta-500 hover:from-cyan-400 hover:via-indigo-400 hover:to-pink-400 text-white font-black uppercase rounded-2xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                      {signingUp ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Initialize Profile"}
                     </button>
                   </form>
                 )}
+                {/* Background ambient glow for form */}
+                <div className="absolute bottom-0 right-0 w-64 h-64 bg-magenta-500/10 blur-3xl pointer-events-none rounded-full"></div>
               </motion.div>
             </motion.div>
           )}

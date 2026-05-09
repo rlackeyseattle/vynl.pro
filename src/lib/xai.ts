@@ -111,3 +111,35 @@ export async function generateBookingEmail(band: any, venue: any, date: string):
     return { subject: `Booking Inquiry: ${band.name}`, body: "Hello, we are interested in booking a show at your venue." };
   }
 }
+
+export async function parseBookingResponse(emailBody: string): Promise<{
+  intent: "POSITIVE" | "NEGATIVE" | "QUESTION" | "SPAM",
+  summary: string,
+  proposedDate?: string,
+  proposedPay?: string,
+  needsFollowUp: boolean,
+  suggestedReply?: string
+}> {
+  try {
+    const prompt = `You are a professional talent buyer's assistant. Analyze the following incoming email from a music venue and extract the status of the booking negotiation.
+    
+    Email Content:
+    """
+    ${emailBody}
+    """
+    
+    Return a JSON object with:
+    - intent: One of "POSITIVE" (they want to book), "NEGATIVE" (no thanks), "QUESTION" (they need info), or "SPAM".
+    - summary: A 1-sentence summary of their stance.
+    - proposedDate: If they suggest a specific date, include it.
+    - proposedPay: If they mention compensation, include it.
+    - needsFollowUp: Boolean.
+    - suggestedReply: A professional, personalized draft for the band to send back based on their tone.
+    `;
+    
+    return await callGrok(prompt);
+  } catch (error) {
+    console.error("Response Parsing Failure:", error);
+    return { intent: "QUESTION", summary: "Failed to parse response", needsFollowUp: true };
+  }
+}

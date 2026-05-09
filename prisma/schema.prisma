@@ -190,8 +190,18 @@ model BookingAttempt {
   venue             VenueProfile @relation(fields: [venueId], references: [id], onDelete: Cascade)
   
   status            String   @default("PENDING") // PENDING, SENT, REPLIED, CONFIRMED, DECLINED
-  threadId          String?  // For email threading
+  resendId          String?  // The Resend Message ID from the initial outbound
+  messageId         String?  // The Message-ID header for threading
+  threadId          String?  // Internal thread identifier
   
   negotiationLog    String?  // AI's summary of the conversation
   lastActivityAt    DateTime @default(now())
+}
+
+model PilotLog {
+  id          String   @id @default(cuid())
+  campaignId  String?
+  level       String   @default("INFO") // INFO, WARN, ERROR, AI
+  message     String
+  createdAt   DateTime @default(now())
 }

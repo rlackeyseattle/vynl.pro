@@ -31,8 +31,20 @@ export async function POST(req: Request) {
       if (mailResult.success) {
         await prisma.bookingAttempt.update({
           where: { id: attempt.id },
-          data: { status: "SENT" }
+          data: { 
+            status: "SENT",
+            resendId: (mailResult.data as any).id
+          }
         });
+        
+        await prisma.pilotLog.create({
+          data: {
+            campaignId: attempt.campaignId,
+            message: `Sent outreach to ${venue.name} (${venue.bookingEmail})`,
+            level: "INFO"
+          }
+        });
+
         return { venue: venue.name, status: "SENT" };
       }
 
