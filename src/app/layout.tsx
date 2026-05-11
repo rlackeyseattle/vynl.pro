@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import Link from "next/link";
 import { AuthButton } from "@/components/AuthButton";
+import { NavLinks } from "@/components/NavLinks";
 import { Search } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -30,11 +31,8 @@ export default function RootLayout({
                     VYNL<span className="text-cyan-400">.PRO</span>
                   </span>
                 </Link>
-                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                  <Link href="/map" className="text-cyan-400 border-b-2 border-cyan-400 pb-[19px] mt-[19px]">Dashboard</Link>
-                  <Link href="/venues" className="text-zinc-400 hover:text-white transition-colors">Venues</Link>
-                  <Link href="/artists" className="text-zinc-400 hover:text-white transition-colors">Artists</Link>
-                  <Link href="/analytics" className="text-zinc-400 hover:text-white transition-colors">Analytics</Link>
+                <nav className="hidden md:flex items-center space-x-6">
+                  <NavLinks />
                 </nav>
               </div>
               <div className="flex items-center space-x-6">

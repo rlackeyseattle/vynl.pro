@@ -46,11 +46,19 @@ export default function MapPage() {
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [showStats, setShowStats] = useState(false);
   const [routeNodes, setRouteNodes] = useState<any[]>([]);
-  const [showSignup, setShowSignup] = useState(true); 
+  const [showSignup, setShowSignup] = useState(false); 
   const [signupData, setSignupData] = useState({ name: "", email: "", zip: "", role: "BAND" });
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
   const [activeTab, setActiveTab] = useState<"INFO" | "BOOKING">("INFO");
+
+  // Only show signup overlay to first-time visitors
+  useEffect(() => {
+    const seen = localStorage.getItem("vynl_circuit_visited");
+    if (!seen) {
+      setTimeout(() => setShowSignup(true), 1500);
+    }
+  }, []);
 
   const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
@@ -91,6 +99,7 @@ export default function MapPage() {
       });
       if (res.ok) {
         setSignedUp(true);
+        localStorage.setItem("vynl_circuit_visited", "1");
         setTimeout(() => setShowSignup(false), 2000);
       }
     } catch (err) {
@@ -134,7 +143,7 @@ export default function MapPage() {
   };
 
   const totalIntel = venues.length + bands.length + resources.length;
-  const showCounter = isLocal || totalIntel > 0;
+  const showCounter = totalIntel > 0;
   
   const studios = resources.filter((r: any) => r.type === 'STUDIO').length;
   const rehearsals = resources.filter((r: any) => r.type === 'REHEARSAL').length;
