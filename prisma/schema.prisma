@@ -85,6 +85,12 @@ model VenueProfile {
   openDates       String? // Summary of upcoming availability
   bookingHistory  String? // Kinds of bands they book
   
+  interiorImage   String?
+  exteriorImage   String?
+  genres          String?
+  payType         String?
+  rssFeedUrl      String?
+  
   claimed         Boolean  @default(false)
   lastCrawledAt   DateTime?
   

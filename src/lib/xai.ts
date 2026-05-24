@@ -13,6 +13,11 @@ export interface VenueData {
   coverCost: string;
   openDates: string; // Summary of upcoming availability
   bookingHistory: string; // Summary of the kinds of bands they book
+  interiorImage?: string;
+  exteriorImage?: string;
+  genres?: string;
+  payType?: string;
+  rssFeedUrl?: string;
 }
 
 export interface BandData {
@@ -69,13 +74,76 @@ export async function discoverTargets(region: string, type: "VENUE" | "BAND" | "
   }
 }
 
+function getFallbackImages(venueType?: string, genres?: string) {
+  const typeLower = (venueType || "").toLowerCase();
+  const genreLower = (genres || "").toLowerCase();
+
+  // Cozy Cafe / Acoustic Cafe
+  if (typeLower.includes("cafe") || typeLower.includes("coffee") || genreLower.includes("acoustic") || genreLower.includes("folk") || genreLower.includes("singer")) {
+    return {
+      interior: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=800",
+      exterior: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800"
+    };
+  }
+  // Jazz / Blues Lounge
+  if (typeLower.includes("lounge") || genreLower.includes("jazz") || genreLower.includes("blues") || genreLower.includes("soul")) {
+    return {
+      interior: "https://images.unsplash.com/photo-1486591978090-58e619d37fe7?q=80&w=800",
+      exterior: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800"
+    };
+  }
+  // Dance / Electronic Club
+  if (genreLower.includes("electronic") || genreLower.includes("dance") || genreLower.includes("house") || genreLower.includes("dj") || genreLower.includes("techno") || typeLower.includes("disco")) {
+    return {
+      interior: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800",
+      exterior: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800"
+    };
+  }
+  // Gritty Rock / Punk / Metal Club
+  if (genreLower.includes("rock") || genreLower.includes("punk") || genreLower.includes("metal") || genreLower.includes("grunge") || typeLower.includes("club") || typeLower.includes("bar") || typeLower.includes("pub")) {
+    return {
+      interior: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800",
+      exterior: "https://images.unsplash.com/photo-1525926477800-7a3b40aea54e?q=80&w=800"
+    };
+  }
+  // Concert Hall / Theatre (Default)
+  return {
+    interior: "https://images.unsplash.com/photo-1514525253361-bee8a1874a1e?q=80&w=800",
+    exterior: "https://images.unsplash.com/photo-1460881680858-30d872d5b530?q=80&w=800"
+  };
+}
+
 export async function crawlVenueIntelligence(query: string): Promise<VenueData | null> {
   try {
     const prompt = `Extract professional booking info for the music venue: "${query}". 
-    Return a JSON object with: name, address, latitude, longitude, phone, bookingEmail, contactName, website, venueType, ageRequirement, averagePay, coverCost, openDates, bookingHistory. 
+    Return a JSON object with: 
+    name, address, latitude, longitude, phone, bookingEmail, contactName, website, venueType, ageRequirement, averagePay, coverCost, openDates, bookingHistory, genres, payType, rssFeedUrl.
+    - "genres" should be a comma-separated list of 2-4 primary genres they book (e.g. "Rock, Metal, Punk" or "Jazz, Blues").
+    - "payType" should describe the typical payment structure (e.g. "Flat Fee", "Door Split", "Guarantee + Cut", "Tips Only").
+    - "rssFeedUrl" should be their real events RSS feed URL if they have one; otherwise return null.
     Focus on finding "open dates" for the next 12 months and describing the "types of bands" they book (e.g. "mostly local metal and punk").`;
     
-    return await callGrok(prompt);
+    const data = await callGrok(prompt);
+    if (data) {
+      // Ensure string fields are properly typed to prevent Prisma validation errors
+      if (data.averagePay !== undefined && data.averagePay !== null) {
+        data.averagePay = String(data.averagePay);
+      }
+      if (data.coverCost !== undefined && data.coverCost !== null) {
+        data.coverCost = String(data.coverCost);
+      }
+
+      // Enrich with Unsplash photography fallbacks
+      const fallbacks = getFallbackImages(data.venueType, data.genres);
+      if (!data.interiorImage) data.interiorImage = fallbacks.interior;
+      if (!data.exteriorImage) data.exteriorImage = fallbacks.exterior;
+      
+      // Setup dynamic RSS feed fallback if no real one is found
+      if (!data.rssFeedUrl) {
+        data.rssFeedUrl = `PENDING`; // We will dynamically set or resolve this in the system
+      }
+    }
+    return data;
   } catch (error) {
     console.error("Venue Intelligence Failure:", error);
     return null;

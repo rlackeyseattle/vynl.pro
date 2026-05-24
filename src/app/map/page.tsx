@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, X, Send, AlertTriangle } from "lucide-react";
+import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, X, Send, AlertTriangle, Radio, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
@@ -268,18 +268,63 @@ export default function MapPage() {
               {activeTab === "INFO" ? (
                 <div className="space-y-4 animate-in fade-in slide-in-from-left-4">
                   <div className="glass p-5 rounded-2xl border-2 border-pink-500/30 bg-pink-500/5">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-black text-white leading-tight uppercase truncate">{selectedVenue.name}</h3>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate">{selectedVenue.address}</p>
                       </div>
-                      <button onClick={() => setSelectedVenue(null)} className="p-2 bg-zinc-900 rounded-lg text-zinc-500"><X className="w-4 h-4" /></button>
+                      <button onClick={() => setSelectedVenue(null)} className="p-2 bg-zinc-900 rounded-lg text-zinc-500 hover:text-white transition-colors shrink-0 ml-2"><X className="w-4 h-4" /></button>
                     </div>
+
+                    {/* Extended Genre Badge Listing */}
+                    <div className="flex items-center gap-1.5 flex-wrap mb-4">
+                      {selectedVenue.genres ? selectedVenue.genres.split(",").map((g: string) => (
+                        <span key={g} className="px-2 py-0.5 bg-pink-500/10 text-pink-400 border border-pink-500/20 rounded-full font-black text-[8px] tracking-wider uppercase">
+                          {g.trim()}
+                        </span>
+                      )) : (
+                        <span className="px-2 py-0.5 bg-zinc-800 text-zinc-500 rounded-full font-black text-[8px] tracking-wider uppercase">
+                          {selectedVenue.venueType || "Live Venue"}
+                        </span>
+                      )}
+                    </div>
+
                     <div className="text-xs text-zinc-400 italic mb-4 leading-relaxed">
                       {selectedVenue.bookingHistory}
                     </div>
                   </div>
                   
+                  {/* Metric breakdown for Average Pay and Compensation Type */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl">
+                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5">Average Pay</span>
+                      <span className="text-sm font-black text-emerald-400">{selectedVenue.averagePay || "TBD"}</span>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl">
+                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5">Pay Model</span>
+                      <span className="text-sm font-black text-indigo-400 uppercase">{selectedVenue.payType || "Flat Fee"}</span>
+                    </div>
+                  </div>
+
+                  {/* dynamic dynamic RSS feed & Spotlight buttons */}
+                  <div className="flex flex-col gap-2">
+                    <a 
+                      href={`/api/venues/${selectedVenue.id}/rss`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="w-full flex items-center justify-center gap-2 py-3 bg-pink-600/10 hover:bg-pink-600/20 text-pink-400 hover:text-white border border-pink-500/20 hover:border-pink-500 rounded-xl text-[10px] font-black uppercase transition-all"
+                    >
+                      <Radio className="w-3.5 h-3.5 animate-pulse" /> SUBSCRIBE TO RSS EVENT FEED
+                    </a>
+
+                    <Link 
+                      href={`/profiles/${selectedVenue.id}`}
+                      className="w-full flex items-center justify-center gap-2 py-3.5 bg-pink-600 hover:bg-pink-700 text-white font-black uppercase text-[10px] rounded-xl transition-all shadow-lg shadow-pink-600/20"
+                    >
+                      VIEW SPOTLIGHT PROFILE <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+
                   {isLocal && selectedVenue.phone && (
                     <div className="p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
                       <p className="text-[10px] font-black text-zinc-500 uppercase mb-1">Direct Line</p>
