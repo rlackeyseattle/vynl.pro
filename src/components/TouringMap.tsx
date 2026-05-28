@@ -1,11 +1,12 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Music, Building2, ExternalLink, Mic2, Speaker, Guitar } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import MarkerClusterGroup from "react-leaflet-cluster";
 
 const venueIcon = L.divIcon({
   className: "custom-div-icon",
@@ -60,35 +61,73 @@ function MapResizer() {
   return null;
 }
 
+function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    onZoomChange(map.getZoom());
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
 export default function TouringMap({ venues = [], bands = [], resources = [], routeNodes = [], onSelectVenue, isProduction }: { venues?: any[], bands?: any[], resources?: any[], routeNodes?: any[], onSelectVenue?: (v: any) => void, isProduction?: boolean }) {
   const center: [number, number] = [39.8283, -98.5795];
+  const [zoomLevel, setZoomLevel] = useState(4);
 
   const polylinePositions = routeNodes.map(node => [node.latitude, node.longitude]);
 
-  return (
-    <div className="h-full w-full rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl relative z-0">
-      <MapContainer 
-        center={center} 
-        zoom={4} 
-        style={{ height: "100%", width: "100%", background: "#09090b" }}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; CARTO'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+  const createClusterCustomIcon = function (cluster: any) {
+    return L.divIcon({
+      html: `<div class="w-12 h-12 bg-pink-600/90 rounded-full border-2 border-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.8)] flex items-center justify-center backdrop-blur-sm text-white font-black text-sm">
+        ${cluster.getChildCount()}
+      </div>`,
+      className: 'custom-marker-cluster',
+      iconSize: L.point(48, 48, true),
+    });
+  };
+
+  const createCentralCounterIcon = (count: number) => {
+    return L.divIcon({
+      className: "custom-central-cluster-icon",
+      html: `<div class="w-24 h-24 bg-zinc-950/95 rounded-full border-4 border-pink-500 shadow-[0_0_35px_rgba(236,72,153,0.85)] flex flex-col items-center justify-center animate-pulse backdrop-blur-md cursor-pointer hover:scale-110 hover:border-pink-400 hover:shadow-[0_0_50px_rgba(236,72,153,0.95)] transition-all duration-300">
+        <span class="text-[8px] font-bold text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1">Explore</span>
+        <span class="text-3xl font-black text-white leading-none tracking-tighter">${count}</span>
+        <span class="text-[9px] font-bold text-pink-400 uppercase tracking-wider leading-none mt-1">Venues</span>
+      </div>`,
+      iconSize: [96, 96],
+      iconAnchor: [48, 48],
+    });
+  };
+
+  // Internal map wrapper to easily consume the leaflet useMap hooks
+  function MapContent() {
+    const map = useMap();
+
+    if (zoomLevel < 7) {
+      return (
+        <Marker 
+          position={center} 
+          icon={createCentralCounterIcon(venues.length)}
+          eventHandlers={{
+            click: () => {
+              map.setView(center, 7, { animate: true, duration: 1.5 });
+            }
+          }}
         />
-        <MapResizer />
+      );
+    }
 
-        {polylinePositions.length > 1 && (
-          <Polyline 
-            positions={polylinePositions as [number, number][]} 
-            color="#ec4899" 
-            weight={4} 
-            dashArray="10, 10" 
-            opacity={0.6}
-          />
-        )}
-
+    return (
+      <MarkerClusterGroup
+        chunkedLoading
+        iconCreateFunction={createClusterCustomIcon}
+        maxClusterRadius={80}
+      >
         {venues.map((venue) => (
           <Marker 
             key={venue.id} 
@@ -103,7 +142,6 @@ export default function TouringMap({ venues = [], bands = [], resources = [], ro
                 <h3 className="font-black text-lg text-pink-500 uppercase">{venue.name}</h3>
                 <p className="text-[10px] text-zinc-400 mb-2">{venue.address}</p>
                 
-                {/* Hide email and specific data on production popups */}
                 {!isProduction && (
                    <div className="mb-3 py-2 border-t border-zinc-900">
                      <p className="text-[10px] font-bold text-zinc-500 uppercase">{venue.bookingEmail || 'No Email'}</p>
@@ -164,6 +202,36 @@ export default function TouringMap({ venues = [], bands = [], resources = [], ro
             </Popup>
           </Marker>
         ))}
+      </MarkerClusterGroup>
+    );
+  }
+
+  return (
+    <div className="h-full w-full rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl relative z-0">
+      <MapContainer 
+        center={center} 
+        zoom={zoomLevel} 
+        style={{ height: "100%", width: "100%", background: "#09090b" }}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; CARTO'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        />
+        <MapResizer />
+        <MapEventHandler onZoomChange={setZoomLevel} />
+
+        {polylinePositions.length > 1 && (
+          <Polyline 
+            positions={polylinePositions as [number, number][]} 
+            color="#ec4899" 
+            weight={4} 
+            dashArray="10, 10" 
+            opacity={0.6}
+          />
+        )}
+
+        <MapContent />
       </MapContainer>
     </div>
   );
