@@ -2,103 +2,186 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Radio, Calendar, MapPin, Clock, DollarSign, ChevronRight, Loader2, Play, Activity } from "lucide-react";
+import { Radio, Calendar, MapPin, Clock, DollarSign, Loader2, Play, Activity, Sparkles, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+interface EventItem {
+  id: string;
+  venueId: string;
+  venueName: string;
+  location: string;
+  title: string;
+  genre: string;
+  time: string;
+  rawDate: string;
+  compensation: string;
+  description: string;
+}
+
+interface FeedData {
+  date: string;
+  today: EventItem[];
+  upcoming: EventItem[];
+}
+
 export default function FeedPage() {
-  const [feed, setFeed] = useState<{date: string, events: any[]}>({ date: "", events: [] });
+  const [feed, setFeed] = useState<FeedData>({ date: "", today: [], upcoming: [] });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"today" | "upcoming">("today");
 
   useEffect(() => {
     fetch("/api/feed/today")
-      .then(r => r.json())
-      .then(data => {
-        setFeed(data);
+      .then((r) => r.json())
+      .then((data) => {
+        setFeed({
+          date: data.date || "",
+          today: Array.isArray(data.today) ? data.today : [],
+          upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
+        });
         setLoading(false);
       })
-      .catch(e => {
+      .catch((e) => {
         console.error(e);
         setLoading(false);
       });
   }, []);
 
+  const activeEvents = activeTab === "today" ? feed.today : feed.upcoming;
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] pb-24">
+    <div className="min-h-screen bg-[#06060a] pb-32">
       {/* Header */}
-      <section className="relative py-20 border-b border-zinc-800/60 overflow-hidden">
+      <section className="relative py-24 border-b border-zinc-900/80 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-600/10 rounded-full blur-[100px]" />
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-pink-500/5 rounded-full blur-[120px]" />
+          <div className="absolute -bottom-32 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[100px]" />
         </div>
         <div className="container mx-auto px-4 text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold text-xs uppercase tracking-widest mx-auto">
-            <Radio className="w-4 h-4 animate-pulse" /> Live Circuit Feed
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 font-bold text-xs uppercase tracking-widest mx-auto">
+            <Radio className="w-4 h-4 animate-pulse text-pink-500" /> Real-time RSS Event Aggregator
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none">
-            Tonight on the Circuit
+            Live on the Circuit
           </h1>
-          <p className="text-zinc-400 max-w-2xl mx-auto font-medium text-lg">
-            {feed.date ? feed.date : "Loading today's schedule..."}
+          <p className="text-zinc-400 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
+            {feed.date ? `${feed.date} — compiled live from active venue RSS event feeds across Washington, Idaho, and Montana.` : "Syncing venue schedules..."}
           </p>
+
+          {/* Premium Tab Switcher */}
+          <div className="flex justify-center pt-8">
+            <div className="relative flex p-1.5 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl backdrop-blur-md">
+              <button
+                onClick={() => setActiveTab("today")}
+                className={`relative px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors z-10 flex items-center gap-2 ${
+                  activeTab === "today" ? "text-black font-black" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                <Radio className="w-4 h-4" /> Tonight ({feed.today.length})
+                {activeTab === "today" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-white rounded-xl -z-10"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("upcoming")}
+                className={`relative px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors z-10 flex items-center gap-2 ${
+                  activeTab === "upcoming" ? "text-black font-black" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Upcoming ({feed.upcoming.length})
+                {activeTab === "upcoming" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-white rounded-xl -z-10"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Feed Timeline */}
-      <section className="container mx-auto px-4 py-16 max-w-3xl">
+      {/* Feed List */}
+      <section className="container mx-auto px-4 py-16 max-w-4xl">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 text-cyan-500">
+          <div className="flex flex-col items-center justify-center py-32 text-pink-500">
             <Loader2 className="w-12 h-12 animate-spin mb-4" />
-            <p className="font-bold tracking-widest uppercase text-xs">Syncing RSS Feeds...</p>
+            <p className="font-bold tracking-widest uppercase text-xs">Parsing XML Feeds...</p>
           </div>
-        ) : feed.events.length === 0 ? (
+        ) : activeEvents.length === 0 ? (
           <div className="text-center py-32 text-zinc-500">
             <Activity className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="font-bold">No events detected on the network tonight.</p>
+            <p className="font-bold">No shows detected in this category today.</p>
           </div>
         ) : (
-          <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-800 before:to-transparent">
-            {feed.events.map((evt, i) => (
-              <motion.div 
-                key={evt.id}
-                initial={{ opacity: 0, y: 20 }}
+          <div className="space-y-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
               >
-                {/* Timeline Icon */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#0a0a0f] bg-zinc-900 group-hover:bg-cyan-500 text-zinc-500 group-hover:text-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors z-10">
-                  <Play className="w-4 h-4 ml-0.5" />
-                </div>
-                
-                {/* Event Card */}
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 hover:border-cyan-500/50 hover:bg-zinc-900 transition-all shadow-lg backdrop-blur-sm group-hover:-translate-y-1 group-hover:shadow-cyan-500/10 cursor-pointer">
-                  <Link href={`/profiles/${evt.venueId}`} className="block">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase bg-cyan-500/10 px-2 py-1 rounded">
-                        {evt.genre}
-                      </span>
-                      <span className="text-xs font-bold text-zinc-500 flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {evt.time}
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-xl font-black text-white leading-tight mb-3 group-hover:text-cyan-400 transition-colors">
-                      {evt.title}
-                    </h3>
-                    
-                    <div className="space-y-2 pt-3 border-t border-zinc-800/60">
-                      <div className="flex items-center gap-2 text-xs font-medium text-zinc-300">
-                        <MapPin className="w-3.5 h-3.5 text-pink-500 shrink-0" />
-                        <span className="truncate">{evt.venueName} <span className="text-zinc-600 ml-1">• {evt.location}</span></span>
+                {activeEvents.map((evt, i) => (
+                  <div
+                    key={evt.id}
+                    className="group relative bg-zinc-950/40 border border-zinc-900 hover:border-pink-500/30 rounded-3xl p-6 transition-all duration-300 hover:shadow-[0_0_35px_rgba(236,72,153,0.05)] hover:-translate-y-1 flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      {/* Badge / Metadata */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black tracking-widest text-pink-400 uppercase bg-pink-500/10 px-2.5 py-1 rounded-md border border-pink-500/20">
+                          {evt.genre}
+                        </span>
+                        <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-zinc-600" /> {evt.time}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs font-medium text-emerald-400">
-                        <DollarSign className="w-3.5 h-3.5 shrink-0" />
-                        <span>{evt.compensation}</span>
+
+                      {/* Title & Info */}
+                      <div>
+                        <h3 className="text-xl font-black text-white leading-tight mb-2 group-hover:text-pink-400 transition-colors">
+                          {evt.title}
+                        </h3>
+                        <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+                          {evt.description}
+                        </p>
                       </div>
                     </div>
-                  </Link>
-                </div>
+
+                    {/* Venue Spotlight Dock */}
+                    <div className="mt-6 pt-4 border-t border-zinc-900/80 flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
+                          <MapPin className="w-3.5 h-3.5 text-pink-500 shrink-0" />
+                          <span className="truncate">{evt.venueName}</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 font-medium truncate pl-5">
+                          {evt.location}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5" /> {evt.compensation}
+                        </span>
+                        <Link
+                          href={`/profiles/${evt.venueId}`}
+                          className="p-2 bg-zinc-900 hover:bg-pink-500 text-zinc-400 hover:text-white rounded-xl transition-all hover:scale-105 border border-zinc-800"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </motion.div>
-            ))}
+            </AnimatePresence>
           </div>
         )}
       </section>
