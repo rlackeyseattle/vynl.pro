@@ -1,0 +1,480 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+const RURAL_DIVE_BARS = [
+  // Monroe, WA
+  {
+    name: "JR Phinnickies Monroe",
+    address: "22921 WA-203, Monroe, WA 98272",
+    latitude: 47.8286,
+    longitude: -121.9703,
+    phone: "360-794-8844",
+    bookingEmail: "booking@jrphinnickies.com",
+    contactName: "Booking Manager",
+    website: "https://www.facebook.com/jrphinnickies/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$300 - $600",
+    coverCost: "$5 - $10",
+    openDates: "Fri/Sat weekends open for booking",
+    bookingHistory: "Country bands, classic rock, acoustic cover acts.",
+    genres: "Country, Rock, Acoustic",
+    payType: "Guarantee + Cut",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "The Buzz Inn Monroe",
+    address: "18960 State Route 2, Monroe, WA 98272",
+    latitude: 47.8590,
+    longitude: -121.9750,
+    phone: "360-794-2899",
+    bookingEmail: "booking@buzzinnsteakhouse.com",
+    contactName: "Lounge Manager",
+    website: "https://buzzinnsteakhouse.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$250 - $400",
+    coverCost: "Free",
+    openDates: "Acoustic Thursdays and select Friday dates",
+    bookingHistory: "Local acoustic soloists and rock duos.",
+    genres: "Acoustic, Rock, Country",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Marysville, WA
+  {
+    name: "JR Phinnickies Marysville",
+    address: "9214 State Ave, Marysville, WA 98270",
+    latitude: 48.0792,
+    longitude: -122.1764,
+    phone: "360-659-9944",
+    bookingEmail: "booking@jrphinnickies.com",
+    contactName: "Booking Director",
+    website: "https://www.facebook.com/jrphinnickiesmarysville/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$350 - $700",
+    coverCost: "$5 - $10",
+    openDates: "Weekly live country & rock showcases",
+    bookingHistory: "High-energy country bands, hard rock, cover acts.",
+    genres: "Country, Rock, Cover Acts",
+    payType: "Guarantee + Cut",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "The Village Restaurant & Lounge",
+    address: "220 Marion Ave, Marysville, WA 98270",
+    latitude: 48.0530,
+    longitude: -122.1740,
+    phone: "360-659-1662",
+    bookingEmail: "booking@marysvillevillage.com",
+    contactName: "Lounge Coordinator",
+    website: "https://marysvillevillage.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$150 - $300",
+    coverCost: "Free",
+    openDates: "Sunday open mic and acoustic nights",
+    bookingHistory: "Folk songwriters, local blues players, light rock.",
+    genres: "Acoustic, Blues, Country",
+    payType: "Tips Only",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Sultan, WA
+  {
+    name: "Sultan Loggers Bar",
+    address: "319 Main St, Sultan, WA 98294",
+    latitude: 47.8622,
+    longitude: -121.8211,
+    phone: "360-793-2281",
+    bookingEmail: "booking@loggersbar.com",
+    contactName: "Tavern Owner",
+    website: "https://www.facebook.com/LoggersBar/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$200 - $500",
+    coverCost: "Free",
+    openDates: "Friday night tavern jams and select Saturdays",
+    bookingHistory: "Southern rock, gritty blues, traditional country.",
+    genres: "Rock, Blues, Country",
+    payType: "Door Split",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Bubba's Roadhouse Sultan",
+    address: "417 Main St, Sultan, WA 98294",
+    latitude: 47.8630,
+    longitude: -121.8150,
+    phone: "360-793-1111",
+    bookingEmail: "booking@bubbasroadhouse.com",
+    contactName: "Bubba",
+    website: "https://www.facebook.com/bubbasroadhousesultan/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$250 - $500",
+    coverCost: "$5",
+    openDates: "Weekend roadhouse gigs",
+    bookingHistory: "Classic rock cover bands, outlaw country, rockabilly.",
+    genres: "Rock, Country, Blues",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Startup, WA
+  {
+    name: "Startup Pub",
+    address: "14315 363rd Ave SE, Startup, WA 98293",
+    latitude: 47.8643,
+    longitude: -121.7397,
+    phone: "360-793-4552",
+    bookingEmail: "booking@startuppub.com",
+    contactName: "Pub Manager",
+    website: "https://startuppub.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$150 - $350",
+    coverCost: "Free",
+    openDates: "Acoustic open mic and weekend local bands",
+    bookingHistory: "Local acoustic artists, folk, classic rock duos.",
+    genres: "Acoustic, Rock, Folk",
+    payType: "Tips Only",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Index, WA
+  {
+    name: "Index Sandbar Tavern",
+    address: "311 Ave A, Index, WA 98256",
+    latitude: 47.8202,
+    longitude: -121.5543,
+    phone: "360-793-2334",
+    bookingEmail: "booking@indexsandbar.com",
+    contactName: "Sandbar Booking",
+    website: "https://indexsandbar.com",
+    venueType: "BAR",
+    ageRequirement: "All Ages",
+    averagePay: "$300 - $600",
+    coverCost: "Free",
+    openDates: "Outdoor summer sessions and indoor winter acoustic",
+    bookingHistory: "Folk bands, acoustic duos, bluegrass troupes.",
+    genres: "Acoustic, Folk, Rock",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Kalispell & Whitefish, MT
+  {
+    name: "The Remington Bar Whitefish",
+    address: "130 Central Ave, Whitefish, MT 59937",
+    latitude: 48.4111,
+    longitude: -114.3372,
+    phone: "406-862-2581",
+    bookingEmail: "booking@remingtonbar.com",
+    contactName: "Remington Booking",
+    website: "https://theremingtonbar.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$400 - $800",
+    coverCost: "$5 - $10",
+    openDates: "Weekly regional and national touring acts",
+    bookingHistory: "Rock, country, bluegrass, alt-indie.",
+    genres: "Rock, Country, Bluegrass",
+    payType: "Guarantee + Cut",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Blue Moon Nite Club",
+    address: "6105 US-2, Columbia Falls, MT 59912",
+    latitude: 48.3688,
+    longitude: -114.1983,
+    phone: "406-892-2200",
+    bookingEmail: "booking@bluemoonmt.com",
+    contactName: "Charlotte",
+    website: "https://bluemoonmt.com",
+    venueType: "CLUB",
+    ageRequirement: "21+",
+    averagePay: "$500 - $1000",
+    coverCost: "$5 - $15",
+    openDates: "Weekend dancehall country and rock gigs",
+    bookingHistory: "Full touring country bands, southern rock, high-energy cover bands.",
+    genres: "Country, Rock, Cover Acts",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Kalispell VFW Post 2252",
+    address: "330 1st Ave W, Kalispell, MT 59901",
+    latitude: 48.1960,
+    longitude: -114.3161,
+    phone: "406-752-2252",
+    bookingEmail: "booking@kalispellvfw.org",
+    contactName: "Canteen Manager",
+    website: "https://kalispellvfw.org",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$150 - $300",
+    coverCost: "Free",
+    openDates: "Acoustic Fridays and veteran community jams",
+    bookingHistory: "Local old-time country, acoustic folk, traditional blues.",
+    genres: "Country, Folk, Acoustic",
+    payType: "Tips Only",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Moose's Saloon Kalispell",
+    address: "115 S Main St, Kalispell, MT 59901",
+    latitude: 48.1970,
+    longitude: -114.3134,
+    phone: "406-755-2337",
+    bookingEmail: "booking@moosessaloon.com",
+    contactName: "Moose Manager",
+    website: "https://moosessaloon.com",
+    venueType: "BAR",
+    ageRequirement: "All Ages",
+    averagePay: "$200 - $400",
+    coverCost: "Free",
+    openDates: "Peanut-shell floor acoustic sessions",
+    bookingHistory: "Traditional bluegrass, acoustic country, slide guitar.",
+    genres: "Country, Bluegrass, Acoustic",
+    payType: "Door Split",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Coeur d'Alene, ID
+  {
+    name: "Iron Horse Bar & Grill CdA",
+    address: "407 E Sherman Ave, Coeur d'Alene, ID 83814",
+    latitude: 47.6728,
+    longitude: -116.7801,
+    phone: "208-667-7314",
+    bookingEmail: "booking@ironhorsestate.com",
+    contactName: "Iron Horse Booking",
+    website: "https://ironhorsestate.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$300 - $600",
+    coverCost: "Free",
+    openDates: "Weekend classic rock and modern country sets",
+    bookingHistory: "High-energy cover bands, rock, modern country.",
+    genres: "Rock, Cover Acts, Country",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "The Moose Lounge CdA",
+    address: "401 E Sherman Ave, Coeur d'Alene, ID 83814",
+    latitude: 47.6722,
+    longitude: -116.7811,
+    phone: "208-664-5001",
+    bookingEmail: "booking@moosecda.com",
+    contactName: "Sherman Manager",
+    website: "https://www.facebook.com/MooseLoungeCDA/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$250 - $500",
+    coverCost: "$5",
+    openDates: "Weekly live rock jams and DJ events",
+    bookingHistory: "Outlaw country, alternative rock, classic rock.",
+    genres: "Rock, Country, DJ",
+    payType: "Door Split",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Nash 509 CdA",
+    address: "206 N 4th St, Coeur d'Alene, ID 83814",
+    latitude: 47.6715,
+    longitude: -116.7834,
+    phone: "208-765-8888",
+    bookingEmail: "booking@nash509.com",
+    contactName: "Nash Booking",
+    website: "https://nash509.com",
+    venueType: "CLUB",
+    ageRequirement: "21+",
+    averagePay: "$400 - $800",
+    coverCost: "$10",
+    openDates: "Touring honky-tonk bands and acoustic sets",
+    bookingHistory: "Modern country bands, bluegrass, acoustic country.",
+    genres: "Country, Acoustic, Rock",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  // Eastern WA
+  {
+    name: "The Big Dipper Spokane",
+    address: "171 S Washington St, Spokane, WA 99201",
+    latitude: 47.6534,
+    longitude: -117.4112,
+    phone: "509-315-9923",
+    bookingEmail: "booking@bigdipperspokane.com",
+    contactName: "Dan",
+    website: "https://bigdipperspokane.com",
+    venueType: "CLUB",
+    ageRequirement: "All Ages",
+    averagePay: "$250 - $600",
+    coverCost: "$10 - $15",
+    openDates: "Hard rock, heavy metal, and punk lineups",
+    bookingHistory: "Local heavy rock bands, hardcore punk, metal.",
+    genres: "Rock, Metal, Punk",
+    payType: "Door Split",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Baby Bar Spokane",
+    address: "827 W 1st Ave, Spokane, WA 99201",
+    latitude: 47.6578,
+    longitude: -117.4260,
+    phone: "509-844-4228",
+    bookingEmail: "booking@babybarspokane.com",
+    contactName: "Patty",
+    website: "https://babybarspokane.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$150 - $300",
+    coverCost: "Free",
+    openDates: "Intimate indie and experimental acoustic sets",
+    bookingHistory: "Lo-fi indie bands, acoustic punk, singer-songwriters.",
+    genres: "Indie, Punk, Acoustic",
+    payType: "Tips Only",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Wally's House of Booze",
+    address: "201 N Wenatchee Ave, Wenatchee, WA 98801",
+    latitude: 47.4235,
+    longitude: -120.3103,
+    phone: "509-888-2999",
+    bookingEmail: "booking@wallyshouse.com",
+    contactName: "Wally Manager",
+    website: "https://www.facebook.com/WallysHouse/",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$200 - $450",
+    coverCost: "$5",
+    openDates: "Central Washington metal & punk shows",
+    bookingHistory: "Metal bands, hard rock, touring punk acts.",
+    genres: "Metal, Rock, Punk",
+    payType: "Door Split",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "The Seasons Performance Hall",
+    address: "101 N Naches Ave, Yakima, WA 98901",
+    latitude: 46.6022,
+    longitude: -120.5055,
+    phone: "509-453-1888",
+    bookingEmail: "booking@theseasonsyakima.com",
+    contactName: "Artistic Director",
+    website: "https://theseasonsyakima.com",
+    venueType: "THEATER",
+    ageRequirement: "All Ages",
+    averagePay: "$500 - $1200",
+    coverCost: "$15 - $30",
+    openDates: "Premium acoustics and performance dates",
+    bookingHistory: "Jazz quartets, folk legends, chamber music, bluegrass.",
+    genres: "Jazz, Folk, Classical",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "The Emerald of Siam",
+    address: "1314 Jadwin Ave, Richland, WA 99354",
+    latitude: 46.2858,
+    longitude: -119.2783,
+    phone: "509-946-9328",
+    bookingEmail: "booking@emeraldofsiam.com",
+    contactName: "Emerald Booking",
+    website: "https://emeraldofsiam.com",
+    venueType: "BAR",
+    ageRequirement: "All Ages",
+    averagePay: "$300 - $600",
+    coverCost: "Free - $10",
+    openDates: "Weekly live rock and fusion showcases",
+    bookingHistory: "Indie rock, jazz fusion, blues, touring acts.",
+    genres: "Rock, Indie, Jazz",
+    payType: "Guarantee + Cut",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  },
+  {
+    name: "Green Room Walla Walla",
+    address: "18 E Main St, Walla Walla, WA 99362",
+    latitude: 46.0645,
+    longitude: -118.3430,
+    phone: "509-522-8888",
+    bookingEmail: "booking@greenroomww.com",
+    contactName: "Walla Walla Coordinator",
+    website: "https://greenroomww.com",
+    venueType: "BAR",
+    ageRequirement: "21+",
+    averagePay: "$250 - $500",
+    coverCost: "Free",
+    openDates: "Acoustic wine country sessions",
+    bookingHistory: "Acoustic pop, soft rock, folk songwriters.",
+    genres: "Acoustic, Rock, Country",
+    payType: "Flat Fee",
+    rssFeedUrl: "PENDING",
+    claimed: false
+  }
+];
+
+async function seedDirect() {
+  console.log("=======================================================");
+  console.log("🌲 OPERATION DIRECT SEED: RURAL & REGIONAL DIVE BARS 🌲");
+  console.log("=======================================================\n");
+
+  let totalSaved = 0;
+
+  for (const data of RURAL_DIVE_BARS) {
+    try {
+      const interiorImage = `https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800`;
+      const exteriorImage = `https://images.unsplash.com/photo-1525926477800-7a3b40aea54e?q=80&w=800`;
+
+      await prisma.venueProfile.upsert({
+        where: { name: data.name },
+        update: {
+          ...data,
+          interiorImage,
+          exteriorImage,
+          lastCrawledAt: new Date()
+        },
+        create: {
+          ...data,
+          interiorImage,
+          exteriorImage,
+          lastCrawledAt: new Date()
+        }
+      });
+      console.log(`     💾 SAVED/UPSERTED: "${data.name}" | ${data.address}`);
+      totalSaved++;
+    } catch (e: any) {
+      console.error(`     ❌ Error saving "${data.name}":`, e.message || e);
+    }
+  }
+
+  const count = await prisma.venueProfile.count();
+  console.log("\n=======================================================");
+  console.log("🎉 DIRECT SEED COMPLETE!");
+  console.log(`💾 SAVED: ${totalSaved}`);
+  console.log(`📈 DATABASE TOTAL: ${count} Venues`);
+  console.log("=======================================================\n");
+}
+
+seedDirect()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());
