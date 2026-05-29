@@ -36,7 +36,7 @@ export default function VenuesPage() {
       .then(r => r.json())
       .then(data => { setVenues(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [debouncedSearch, state]);
+  }, [debouncedSearch, state, genre, type]);
 
   const toggleSelection = (id: string) => {
     setSelectedVenueIds(prev => {

@@ -91,16 +91,16 @@ export default function TouringMap({ venues = [], bands = [], resources = [], ro
     });
   };
 
-  const createCentralCounterIcon = (count: number) => {
+  const createRegionalCounterIcon = (code: string, count: number, borderClass: string, textClass: string, glowClass: string) => {
     return L.divIcon({
-      className: "custom-central-cluster-icon",
-      html: `<div class="w-24 h-24 bg-zinc-950/95 rounded-full border-4 border-pink-500 shadow-[0_0_35px_rgba(236,72,153,0.85)] flex flex-col items-center justify-center animate-pulse backdrop-blur-md cursor-pointer hover:scale-110 hover:border-pink-400 hover:shadow-[0_0_50px_rgba(236,72,153,0.95)] transition-all duration-300">
-        <span class="text-[8px] font-bold text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1">Explore</span>
-        <span class="text-3xl font-black text-white leading-none tracking-tighter">${count}</span>
-        <span class="text-[9px] font-bold text-pink-400 uppercase tracking-wider leading-none mt-1">Venues</span>
+      className: "custom-regional-cluster-icon",
+      html: `<div class="w-20 h-20 bg-zinc-950/95 rounded-full border-4 ${borderClass} ${glowClass} flex flex-col items-center justify-center animate-pulse backdrop-blur-md cursor-pointer hover:scale-110 transition-all duration-300">
+        <span class="text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1">${code}</span>
+        <span class="text-2xl font-black text-white leading-none tracking-tighter">${count}</span>
+        <span class="text-[8px] font-bold ${textClass} uppercase tracking-wider leading-none mt-1">Venues</span>
       </div>`,
-      iconSize: [96, 96],
-      iconAnchor: [48, 48],
+      iconSize: [80, 80],
+      iconAnchor: [40, 40],
     });
   };
 
@@ -108,17 +108,43 @@ export default function TouringMap({ venues = [], bands = [], resources = [], ro
   function MapContent() {
     const map = useMap();
 
-    if (zoomLevel < 7) {
+    const nwVenues = venues.filter(v => v.latitude >= 42 && v.longitude < -110);
+    const swVenues = venues.filter(v => v.latitude < 42 && v.longitude < -104);
+    const neVenues = venues.filter(v => v.latitude >= 38 && v.longitude >= -82);
+    const seVenues = venues.filter(v => v.latitude < 38 && v.longitude >= -104);
+    const mwVenues = venues.filter(v => 
+      !(v.latitude >= 42 && v.longitude < -110) &&
+      !(v.latitude < 42 && v.longitude < -104) &&
+      !(v.latitude >= 38 && v.longitude >= -82) &&
+      !(v.latitude < 38 && v.longitude >= -104)
+    );
+
+    const regions = [
+      { name: "Northwest", code: "NW", center: [45.5, -120.5] as [number, number], border: "border-pink-500", text: "text-pink-400", glow: "shadow-[0_0_25px_rgba(236,72,153,0.7)]", count: nwVenues.length },
+      { name: "Southwest", code: "SW", center: [36.5, -117.0] as [number, number], border: "border-indigo-500", text: "text-indigo-400", glow: "shadow-[0_0_25px_rgba(99,102,241,0.7)]", count: swVenues.length },
+      { name: "Midwest", code: "MW", center: [42.0, -93.0] as [number, number], border: "border-emerald-500", text: "text-emerald-400", glow: "shadow-[0_0_25px_rgba(16,185,129,0.7)]", count: mwVenues.length },
+      { name: "Southeast", code: "SE", center: [32.5, -97.0] as [number, number], border: "border-orange-500", text: "text-orange-400", glow: "shadow-[0_0_25px_rgba(249,115,22,0.7)]", count: seVenues.length },
+      { name: "Northeast", code: "NE", center: [41.5, -76.0] as [number, number], border: "border-purple-500", text: "text-purple-400", glow: "shadow-[0_0_25px_rgba(168,85,247,0.7)]", count: neVenues.length },
+    ];
+
+    if (zoomLevel < 5) {
       return (
-        <Marker 
-          position={center} 
-          icon={createCentralCounterIcon(venues.length)}
-          eventHandlers={{
-            click: () => {
-              map.setView(center, 7, { animate: true, duration: 1.5 });
-            }
-          }}
-        />
+        <>
+          {regions.map((region) => (
+            region.count > 0 && (
+              <Marker 
+                key={region.code}
+                position={region.center} 
+                icon={createRegionalCounterIcon(region.code, region.count, region.border, region.text, region.glow)}
+                eventHandlers={{
+                  click: () => {
+                    map.setView(region.center, 6, { animate: true, duration: 1.5 });
+                  }
+                }}
+              />
+            )
+          ))}
+        </>
       );
     }
 
