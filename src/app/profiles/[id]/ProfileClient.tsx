@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import { ParallaxBackground } from "@/components/ParallaxBackground";
 import { MusicPlayer } from "@/components/MusicPlayer";
-import { Play, Camera, Send, Globe, Calendar, ShoppingBag, Radio, MapPin, Mail, Phone, Users, Clock } from "lucide-react";
+import { Play, Camera, Send, Globe, Calendar, ShoppingBag, Radio, MapPin, Mail, Phone, Users, Clock, Loader2, X } from "lucide-react";
+import { useState } from "react";
 
 interface ProfileClientProps {
   type: "BAND" | "VENUE";
@@ -12,6 +13,36 @@ interface ProfileClientProps {
 
 export default function ProfileClient({ type, data }: ProfileClientProps) {
   const isBand = type === "BAND";
+  
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingDraft, setBookingDraft] = useState({ dates: "", message: "" });
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendBooking = async () => {
+    setIsSending(true);
+    try {
+      const res = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venueId: data.id,
+          dates: bookingDraft.dates,
+          message: bookingDraft.message
+        })
+      });
+      if (res.ok) {
+        alert("Booking request sent successfully!");
+        setShowBookingModal(false);
+        setBookingDraft({ dates: "", message: "" });
+      } else {
+        alert("Failed to send booking.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSending(false);
+    }
+  };
   
   // Default values if data is missing
   const name = data.name || "UNNAMED ARTIST";
@@ -163,7 +194,10 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
               )}
             </div>
             
-            <button className="w-full mt-12 py-5 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-2xl font-black text-xl shadow-xl shadow-indigo-600/20">
+            <button 
+              onClick={() => setShowBookingModal(true)}
+              className="w-full mt-12 py-5 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-2xl font-black text-xl shadow-xl shadow-indigo-600/20"
+            >
               {isBand ? "SEND BOOKING REQUEST" : "ENQUIRE ABOUT DATES"}
             </button>
           </div>
@@ -215,6 +249,58 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
           </button>
         </div>
       </ParallaxBackground>
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-xl bg-zinc-950 border border-zinc-800 rounded-3xl p-8 shadow-2xl relative"
+          >
+            <button 
+              onClick={() => setShowBookingModal(false)}
+              className="absolute top-6 right-6 text-zinc-500 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
+              Book {name}
+            </h2>
+            <p className="text-zinc-400 mb-8">Send a direct inquiry to their booking team.</p>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="text-xs font-black uppercase text-zinc-500 block mb-2">Target Dates</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. November 12th, or 'Any weekend in Fall'"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  value={bookingDraft.dates}
+                  onChange={(e) => setBookingDraft(prev => ({...prev, dates: e.target.value}))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-zinc-500 block mb-2">Message</label>
+                <textarea 
+                  placeholder={`Hi ${data.contactName || "Booking"}, we'd love to play at ${name}...`}
+                  className="w-full h-40 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                  value={bookingDraft.message}
+                  onChange={(e) => setBookingDraft(prev => ({...prev, message: e.target.value}))}
+                />
+              </div>
+              
+              <button 
+                onClick={handleSendBooking}
+                disabled={isSending || !bookingDraft.message || !bookingDraft.dates}
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black text-lg uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] flex justify-center items-center gap-2"
+              >
+                {isSending ? <Loader2 className="w-6 h-6 animate-spin" /> : "SEND INQUIRY"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
