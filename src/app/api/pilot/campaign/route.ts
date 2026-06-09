@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { calculateDistance } from "@/lib/geo";
+import { calculateMatch } from "@/lib/matchmaker";
 
 export async function POST(req: Request) {
   try {
     const { userId, targetDates, maxRadius, minCompensation } = await req.json();
 
-    // 1. Get Band Profile to find location
+    // 1. Get Band Profile to find location & genre
     const band = await prisma.bandProfile.findUnique({
       where: { userId },
       include: { user: true }
@@ -21,43 +22,70 @@ export async function POST(req: Request) {
       data: {
         userId,
         targetDates: JSON.stringify(targetDates),
-        maxRadius,
-        minCompensation,
+        maxRadius: Number(maxRadius) || 100,
+        minCompensation: Number(minCompensation) || 150,
       }
     });
 
-    // 3. Search for Venues within Radius
+    // 3. Search for Venues with booking email
     const venues = await prisma.venueProfile.findMany({
       where: {
         bookingEmail: { not: null },
       }
     });
 
-    const targetVenues = venues.filter(v => {
-      if (!v.latitude || !v.longitude) return false;
-      const distance = calculateDistance(band.latitude!, band.longitude!, v.latitude, v.longitude);
-      return distance <= maxRadius;
-    });
+    // 4. Calculate matches and filter out completely unmatched (e.g. out of radius or match < 40%)
+    const matchedVenues = venues
+      .map(v => {
+        if (!v.latitude || !v.longitude) return null;
+        
+        const match = calculateMatch(
+          { latitude: band.latitude!, longitude: band.longitude!, genre: band.genre },
+          { latitude: v.latitude, longitude: v.longitude, genres: v.genres, averagePay: v.averagePay, openDates: v.openDates },
+          targetDates || [],
+          maxRadius || 100,
+          minCompensation || 150
+        );
 
-    // 4. Create Booking Attempts (Staged)
-    const attempts = await Promise.all(targetVenues.map(v => 
+        return { venue: v, match };
+      })
+      .filter(item => item !== null && item.match.locationScore > 0 && item.match.overallScore >= 40) as { venue: any, match: any }[];
+
+    // 5. Create Booking Attempts (Staged with dynamic matching logs)
+    const attempts = await Promise.all(matchedVenues.map(item => 
       prisma.bookingAttempt.create({
         data: {
           campaignId: campaign.id,
-          venueId: v.id,
-          status: "PENDING"
+          venueId: item.venue.id,
+          status: "PENDING",
+          negotiationLog: `[MATCH ANALYSIS]
+Overall Match: ${item.match.overallScore}%
+- Genre Match: ${item.match.genreScore}% (${item.match.details.genreMatch})
+- Pay Match: ${item.match.payScore}% (${item.match.details.payMatch})
+- Location Match: ${item.match.locationScore}% (${item.match.details.distance} miles away)
+- Schedule Match: ${item.match.scheduleScore}% (${item.match.details.scheduleMatch})
+          `
         }
       })
     ));
 
+    // Create Pilot Logs for audit trail
+    await prisma.pilotLog.create({
+      data: {
+        campaignId: campaign.id,
+        message: `Pilot initiated campaign with parameters: Radius=${maxRadius}mi, Min Pay=$${minCompensation}. Found ${venues.length} venues, auto-matched ${attempts.length} matching criteria.`,
+        level: "INFO"
+      }
+    });
+
     return NextResponse.json({ 
       success: true, 
       campaignId: campaign.id, 
-      venuesFound: targetVenues.length 
+      venuesFound: attempts.length 
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Campaign Creation Failure:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

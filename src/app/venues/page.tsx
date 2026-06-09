@@ -104,6 +104,36 @@ export default function VenuesPage() {
   const [isContractSigned, setIsContractSigned] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // National Harvester States
+  const [showHarvester, setShowHarvester] = useState(false);
+  const [harvestRegion, setHarvestRegion] = useState("Spokane, WA");
+  const [harvesting, setHarvesting] = useState(false);
+  const [harvestLogs, setHarvestLogs] = useState<string[]>([]);
+
+  const runHarvester = async () => {
+    setHarvesting(true);
+    setHarvestLogs(["Scouting region...", "Cross-referencing Bandsintown database...", "Fetching verified event histories..."]);
+    try {
+      const res = await fetch("/api/venues/harvest", {
+        method: "POST",
+        body: JSON.stringify({ region: harvestRegion }),
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHarvestLogs(prev => [...prev, ...data.logs, `Successfully synced ${data.count} active music venues.`]);
+        // Trigger a reload of the venues list
+        setSearch(harvestRegion.split(",")[0]);
+      } else {
+        setHarvestLogs(prev => [...prev, `Harvest error: ${data.error}`]);
+      }
+    } catch (err) {
+      setHarvestLogs(prev => [...prev, "Critical connection error during harvesting."]);
+    } finally {
+      setHarvesting(false);
+    }
+  };
+
   // Digital Signature Canvas
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawingRef = useRef(false);
@@ -392,19 +422,78 @@ export default function VenuesPage() {
         {/* Subtle watercolor blots */}
         <div style={{ position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(197,160,89,0.06) 0%, transparent 70%)', filter: 'blur(60px)', top: '-10%', left: '10%', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(95,138,107,0.05) 0%, transparent 70%)', filter: 'blur(80px)', bottom: '-15%', right: '10%', pointerEvents: 'none' }} />
-        
         <div className="container mx-auto px-6 space-y-4 relative z-10">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 1.1rem', borderRadius: '100px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}` }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: P }} />
-            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // NATIONAL GIG MATCHMAKER</span>
+          <div className="flex justify-between items-end flex-wrap gap-4">
+            <div className="space-y-4">
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 1.1rem', borderRadius: '100px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}` }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P }} />
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // NATIONAL GIG MATCHMAKER</span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black text-[#2c2c2c] tracking-tight leading-none" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>
+                The Outpost Grid
+              </h1>
+            </div>
+            <button 
+              onClick={() => setShowHarvester(!showHarvester)}
+              style={{
+                borderColor: showHarvester ? P : BORDER_COLOR,
+                color: showHarvester ? P : CHARCOAL,
+                background: showHarvester ? 'rgba(178,83,41,0.04)' : '#faf9f5'
+              }}
+              className="px-6 py-3 border rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 hover:scale-[1.02] transition-all cursor-pointer shadow-sm"
+            >
+              <Sparkles size={14} className={harvesting ? "animate-spin text-pink-500" : "text-pink-500"} />
+              {showHarvester ? "Close Harvester" : "Discover & Sync National Venues"}
+            </button>
           </div>
-          
-          <h1 className="text-4xl md:text-6xl font-black text-[#2c2c2c] tracking-tight leading-none" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>
-            The Outpost Grid
-          </h1>
+
           <p className="text-zinc-600 max-w-xl text-sm leading-relaxed" style={{ fontFamily: 'Outfit, sans-serif' }}>
             {venues.length > 0 ? `${venues.length} active live venues` : "Connecting to Vynl networks..."} — Plot interactive routes on the Technical US Map, select tour segments, and negotiate instant crowd-backed agreements.
           </p>
+
+          {/* Harvester Input Panel */}
+          <AnimatePresence>
+            {showHarvester && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{ border: `1.5px solid ${BORDER_COLOR}`, background: '#fcfbfa' }}
+                className="p-6 rounded-2xl space-y-4 max-w-2xl overflow-hidden"
+              >
+                <div>
+                  <h3 className="text-sm font-black text-zinc-800 uppercase tracking-widest flex items-center gap-2">
+                    <Globe size={16} className="text-pink-500" /> Active Venue Finder
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 uppercase font-semibold">Queries Grok and cross-references event active statuses</p>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={harvestRegion}
+                    onChange={e => setHarvestRegion(e.target.value)}
+                    placeholder="e.g. Kalispell, MT or Coeur d'Alene, ID"
+                    style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
+                    className="flex-1 border rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#c5a059]"
+                  />
+                  <button 
+                    disabled={harvesting || !harvestRegion}
+                    onClick={runHarvester}
+                    style={{ background: CHARCOAL, color: '#faf9f5' }}
+                    className="px-6 py-3 rounded-xl font-bold uppercase text-xs hover:opacity-95 transition-opacity"
+                  >
+                    {harvesting ? "Scouting..." : "Discover & Sync"}
+                  </button>
+                </div>
+
+                {harvestLogs.length > 0 && (
+                  <div className="bg-[#faf9f5] border border-[#d5cfbe] rounded-xl p-3 h-32 overflow-y-auto font-mono text-[10px] text-zinc-600 space-y-1 custom-scrollbar">
+                    {harvestLogs.map((h, i) => <p key={i}>{h}</p>)}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Search & Dynamic Filters Deck */}
           <div className="flex flex-col lg:flex-row gap-3 max-w-5xl pt-6">
