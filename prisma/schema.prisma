@@ -33,6 +33,7 @@ model User {
 model BandProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
+  slug            String?  @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   genre           String?
@@ -53,6 +54,30 @@ model BandProfile {
   headerImage     String?
   design1Image    String?
   design2Image    String?
+  profileImage    String?
+  backgroundImage String?
+  bio             String?
+
+  // Streaming URLs
+  spotifyUrl      String?
+  appleMusicUrl   String?
+  tidalUrl        String?
+  youtubeUrl      String?
+  bandcampUrl     String?
+  soundcloudUrl   String?
+
+  // EPK Questionnaire Details
+  isTouring       Boolean  @default(false)
+  isNational      Boolean  @default(false)
+  isSigned        Boolean  @default(false)
+  hasRepresentation Boolean @default(false)
+  representationDetails String?
+  contactEmail    String?
+  contactPhone    String?
+  bandRider       String?  // Rider technical requirements (text)
+  providesPA      Boolean  @default(false)
+  hasSoundGuy     Boolean  @default(false)
+  handlesPresales Boolean  @default(false)
 
   // ── Match & Book criteria ─────────────────────────────────────
   minimumGuarantee  Float?   // Artist's minimum pay floor
@@ -77,6 +102,7 @@ model VenueProfile {
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   name            String   @unique
+  slug            String?  @unique
   address         String?
   latitude        Float?
   longitude       Float?
@@ -96,9 +122,16 @@ model VenueProfile {
   
   interiorImage   String?
   exteriorImage   String?
+  stageImage      String?
   genres          String?
   payType         String?
   rssFeedUrl      String?
+
+  // Questionnaire details
+  bookingDays            String?  // e.g., "Thursday, Friday, Saturday"
+  eventFeedUrl           String?
+  targetBandsDescription  String?
+  targetBookingNights    String?
 
   // ── Match & Book criteria ─────────────────────────────────────
   capacity        Int?     // Room capacity / draw expectations

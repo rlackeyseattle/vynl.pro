@@ -37,10 +37,23 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          // Create base profile based on role
+          // Create base profile based on role and assign default slug
+          const defaultSlug = credentials.email.split("@")[0].toLowerCase().replace(/[^a-z0-9-]/g, "-");
           if (role === "BAND") {
             await prisma.bandProfile.create({
-              data: { userId: newUser.id },
+              data: { 
+                userId: newUser.id,
+                slug: defaultSlug,
+              },
+            });
+          } else if (role === "VENUE") {
+            await prisma.venueProfile.create({
+              data: { 
+                userId: newUser.id,
+                name: credentials.email.split("@")[0].toUpperCase() + " VENUE",
+                slug: defaultSlug,
+                bookingEmail: credentials.email,
+              },
             });
           }
 

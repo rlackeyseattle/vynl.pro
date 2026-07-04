@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ProfileClient from "./ProfileClient";
 
-export default async function ProfilePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   // Try to find the user and their profiles
   const user = await prisma.user.findUnique({
