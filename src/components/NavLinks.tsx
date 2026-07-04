@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart } from "lucide-react";
+import { Zap } from "lucide-react";
 
 const links = [
   { href: "/map", label: "Dashboard" },
@@ -28,7 +28,7 @@ export function NavLinks() {
                   : "border-pink-500/50 text-pink-400 hover:bg-pink-950/40 hover:border-pink-400"
               }`}
             >
-              <Heart className="w-3 h-3" />
+              <Zap className="w-3 h-3" />
               {label}
             </Link>
           );

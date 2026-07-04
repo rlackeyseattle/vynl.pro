@@ -30,6 +30,14 @@ import {
   PenTool
 } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const TouringMap = dynamic(() => import("@/components/TouringMap"), { 
+  ssr: false,
+  loading: () => <div className="h-[420px] w-full bg-zinc-900 animate-pulse rounded-3xl flex items-center justify-center">
+    <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+  </div>
+});
 
 /* ——— Colors (DaVinci Technical Sketchbook Ink Palette) ——— */
 const P = '#b25329';   // Burnt rust/brick ink
@@ -586,106 +594,14 @@ export default function VenuesPage() {
               </div>
             </div>
 
-            {/* Hand-Drawn SVG Map panel */}
-            <div style={{ background: '#f2eedf', border: `1.5px solid ${OR}`, borderRadius: '12px', width: '100%', height: '420px', position: 'relative', overflow: 'hidden' }}>
-              {/* Map grid lines */}
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: `linear-gradient(rgba(197,160,89,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(197,160,89,0.09) 1px, transparent 1px)`, backgroundSize: '25px 25px', pointerEvents: 'none' }} />
-              
-              <svg viewBox="0 0 800 480" style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
-                {/* Hand sketched US Outline Polyline */}
-                <path
-                  d="M 50 100 C 120 70, 240 60, 320 60 C 420 50, 520 60, 620 50 C 700 45, 750 90, 780 120 C 810 160, 770 210, 790 250 C 810 290, 740 310, 730 350 C 710 390, 680 410, 630 400 C 580 390, 540 430, 480 430 C 420 430, 360 410, 320 370 C 260 380, 210 400, 160 380 C 130 360, 120 320, 80 290 C 40 260, 50 210, 30 180 C 10 150, 10 120, 50 100 Z"
-                  fill="none"
-                  stroke="rgba(197,160,89,0.25)"
-                  strokeWidth="3.5"
-                  strokeDasharray="6,4"
-                />
-
-                {/* Compass Medallion */}
-                <g transform="translate(710, 110)" opacity="0.6">
-                  <circle cx="0" cy="0" r="30" fill="none" stroke={OR} strokeWidth="1" strokeDasharray="3 3" />
-                  <line x1="-38" y1="0" x2="38" y2="0" stroke={OR} strokeWidth="1" />
-                  <line x1="0" y1="-38" x2="0" y2="38" stroke={OR} strokeWidth="1" />
-                  <polygon points="0,-35 4,-8 0,0" fill={P} />
-                  <polygon points="0,-35 -4,-8 0,0" fill={OR} />
-                  <text x="-4" y="-40" fontFamily="Share Tech Mono" fontSize="9" fill={CHARCOAL} fontWeight="bold">N</text>
-                </g>
-
-                {/* Dotted route lines in select order */}
-                {selectedVenuesInOrder.length > 1 && (
-                  <path
-                    d={`M ${selectedVenuesInOrder.map(v => `${v.projected.x} ${v.projected.y}`).join(' L ')}`}
-                    fill="none"
-                    className="custom-route-line"
-                  />
-                )}
-
-                {/* Dynamic Venue Dots */}
-                {venues.map((v, i) => {
-                  const isSelected = selectedVenueIds.has(v.id);
-                  const isCoop = v.venueType?.toUpperCase() === 'COOPERATIVE' || !v.averagePay?.includes("%");
-                  const coords = getProjectedCoords(v, i);
-
-                  return (
-                    <g 
-                      key={v.id}
-                      onClick={() => toggleSelection(v.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <circle
-                        cx={coords.x}
-                        cy={coords.y}
-                        r={isSelected ? "9" : "6"}
-                        fill={isSelected ? P : (isCoop ? C : OR)}
-                        stroke={CHARCOAL}
-                        strokeWidth="1.5"
-                      />
-                      <circle
-                        cx={coords.x}
-                        cy={coords.y}
-                        r={isSelected ? "15" : "11"}
-                        fill="none"
-                        stroke={isSelected ? P : (isCoop ? C : OR)}
-                        strokeWidth="1"
-                        opacity={isSelected ? "0.85" : "0.3"}
-                      />
-                      <text
-                        x={coords.x + 11}
-                        y={coords.y + 3}
-                        fill={isSelected ? P : CHARCOAL}
-                        fontFamily="Share Tech Mono, monospace"
-                        fontSize="9"
-                        fontWeight={isSelected ? "bold" : "normal"}
-                        style={{ textShadow: '1px 1px 0px #faf9f5' }}
-                      >
-                        {v.name.slice(0, 12).toUpperCase()}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Map Guide overlay */}
-              <div style={{ position: 'absolute', bottom: '15px', left: '15px', right: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '12px', background: '#faf9f5', padding: '6px 12px', borderRadius: '4px', border: `1.5px solid ${BORDER_COLOR}`, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C }} />
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', color: CHARCOAL, fontWeight: 800 }}>COOPERATIVE</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: OR }} />
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', color: CHARCOAL, fontWeight: 800 }}>TRADITIONAL</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: P }} />
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', color: CHARCOAL, fontWeight: 800 }}>SELECTED</span>
-                  </div>
-                </div>
-
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', color: '#555', background: '#faf9f5', padding: '6px 10px', borderRadius: '4px', border: `1.5px solid ${BORDER_COLOR}` }}>
-                  💡 SELECT MARKERS TO MAP ROUTE
-                </span>
-              </div>
+            {/* Real Interactive Map panel */}
+            <div style={{ border: `1.5px solid ${OR}`, borderRadius: '12px', width: '100%', height: '420px', position: 'relative', overflow: 'hidden' }}>
+              <TouringMap 
+                venues={venues} 
+                routeNodes={selectedVenuesInOrder} 
+                onSelectVenue={(v) => toggleSelection(v.id)} 
+                isProduction={true} 
+              />
             </div>
 
             {/* Custom Route Stats Sheet */}

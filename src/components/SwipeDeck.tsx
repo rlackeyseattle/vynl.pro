@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Heart, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap } from "lucide-react";
+import { X, Heart, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap, Check } from "lucide-react";
 import { useCardDeck } from "@/hooks/useCardDeck";
 import { getDiscoveryFeed } from "@/app/actions/swipe";
 import { DraftContract } from "@/app/actions/swipe";
@@ -428,7 +428,7 @@ export function SwipeDeck({ initialCards, role, radiusMiles = 100 }: SwipeDeckPr
               disabled={isSwiping}
               className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 flex items-center justify-center transition-all duration-200 shadow-[0_0_30px_rgba(236,72,153,0.4)] hover:shadow-[0_0_50px_rgba(236,72,153,0.7)] active:scale-90 disabled:opacity-50"
             >
-              <Heart className="w-8 h-8 text-white fill-white" />
+              <Check className="w-9 h-9 text-white stroke-[3px]" />
             </button>
 
             {/* Skip (same as pass but labeled) */}
