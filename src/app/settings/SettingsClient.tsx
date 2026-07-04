@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { updateProfile } from "@/app/actions/profile";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import ImageUploader from "@/components/ImageUploader";
 import { 
-  User, Music, Building, Image as ImageIcon, Link as LinkIcon, 
-  DollarSign, ShieldCheck, Mail, Phone, Sliders, CheckCircle2, 
-  Briefcase, Loader2, Save, FileText, Globe
+  User, Building, Image as ImageIcon, Link as LinkIcon, 
+  DollarSign, Sliders, CheckCircle2, ExternalLink,
+  Briefcase, Loader2, Save, Globe, AlertCircle
 } from "lucide-react";
 
 interface SettingsClientProps {
@@ -20,6 +22,7 @@ export default function SettingsClient({ role, initialProfile, initialUser }: Se
   const [activeTab, setActiveTab] = useState("identity");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [liveSlug, setLiveSlug] = useState(initialProfile?.slug || "");
 
   // Common identity
   const [name, setName] = useState(initialUser?.name || initialProfile?.name || "");
@@ -238,11 +241,27 @@ export default function SettingsClient({ role, initialProfile, initialUser }: Se
                     <div className="relative flex items-center">
                       <span className="absolute left-4 text-xs font-bold text-zinc-500">vynl.pro/</span>
                       <input 
-                        type="text" value={slug} onChange={(e) => setSlug(e.target.value)}
+                        type="text" 
+                        value={slug} 
+                        onChange={(e) => {
+                          const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+                          setSlug(val);
+                          setLiveSlug(val);
+                        }}
                         className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl pl-20 pr-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
                         placeholder="your-custom-url"
                       />
                     </div>
+                    {liveSlug && (
+                      <a
+                        href={`/${liveSlug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[10px] text-pink-400 hover:text-pink-300 font-bold uppercase tracking-wide transition-colors"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Preview: vynl.pro/{liveSlug}
+                      </a>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Primary Genre / Music Type</label>
@@ -501,64 +520,59 @@ export default function SettingsClient({ role, initialProfile, initialUser }: Se
 
             {/* ── VISUALS & IMAGES TAB (Both) ───────────────────────────────── */}
             {activeTab === "visuals" && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  {isBand ? (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Profile Avatar Image URL</label>
-                        <input 
-                          type="text" value={profileImage} onChange={(e) => setProfileImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Header Hero Image URL</label>
-                        <input 
-                          type="text" value={headerImage} onChange={(e) => setHeaderImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Profile Page Background Image URL (Parallax Override)</label>
-                        <input 
-                          type="text" value={backgroundImage} onChange={(e) => setBackgroundImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Venue Exterior Image URL</label>
-                        <input 
-                          type="text" value={exteriorImage} onChange={(e) => setExteriorImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Venue Interior Image URL</label>
-                        <input 
-                          type="text" value={interiorImage} onChange={(e) => setInteriorImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Stage Photo URL</label>
-                        <input 
-                          type="text" value={stageImage} onChange={(e) => setStageImage(e.target.value)}
-                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500"
-                          placeholder="https://images.unsplash.com/... (Image URL)"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
+              <div className="space-y-8">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b border-zinc-900 pb-3">
+                  Upload your images or paste a URL. Click any image zone to browse.
+                </p>
+                {isBand ? (
+                  <div className="space-y-8">
+                    <ImageUploader
+                      label="Profile / Avatar Photo"
+                      value={profileImage}
+                      onChange={setProfileImage}
+                      aspectRatio="square"
+                      description="Best as a square headshot or band logo — shown in your gallery and on cards"
+                    />
+                    <ImageUploader
+                      label="Header / Hero Image"
+                      value={headerImage}
+                      onChange={setHeaderImage}
+                      aspectRatio="banner"
+                      description="Displayed as a full-width banner at the top of your profile page"
+                    />
+                    <ImageUploader
+                      label="Page Background Image (Parallax)"
+                      value={backgroundImage}
+                      onChange={setBackgroundImage}
+                      aspectRatio="wide"
+                      description="Full-page background with parallax scroll effect — use a dark, moody photo"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    <ImageUploader
+                      label="Venue Exterior Photo"
+                      value={exteriorImage}
+                      onChange={setExteriorImage}
+                      aspectRatio="wide"
+                      description="Storefront or building exterior — shown in the gallery and on the map card"
+                    />
+                    <ImageUploader
+                      label="Venue Interior Photo"
+                      value={interiorImage}
+                      onChange={setInteriorImage}
+                      aspectRatio="wide"
+                      description="Inside the bar / room — bar, tables, crowd feel"
+                    />
+                    <ImageUploader
+                      label="Stage / Performance Area"
+                      value={stageImage}
+                      onChange={setStageImage}
+                      aspectRatio="wide"
+                      description="The stage, lights, and production setup"
+                    />
+                  </div>
+                )}
               </div>
             )}
 

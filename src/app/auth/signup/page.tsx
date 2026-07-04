@@ -50,14 +50,14 @@ export default function SignupPage() {
         email,
         password,
         redirect: false,
-        callbackUrl: "/map",
+        callbackUrl: "/settings",
       });
 
       if (loginRes?.error) {
         setError("Account created, but automatic sign-in failed. Please log in.");
         router.push("/auth/login");
       } else {
-        router.push("/map");
+        router.push("/settings");
         router.refresh();
       }
     } catch (err) {
