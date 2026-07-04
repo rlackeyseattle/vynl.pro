@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const fromAddress = emailData.from;
     const subject = emailData.subject;
-    const body = emailData.text || emailData.html;
+    const body = emailData.text || emailData.html || "";
 
     // 1. Find the BookingAttempt
     // We try to match by fromAddress (the venue) and campaign activity

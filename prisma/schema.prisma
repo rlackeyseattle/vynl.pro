@@ -53,11 +53,20 @@ model BandProfile {
   headerImage     String?
   design1Image    String?
   design2Image    String?
+
+  // ── Match & Book criteria ─────────────────────────────────────
+  minimumGuarantee  Float?   // Artist's minimum pay floor
+  expectedDraw      Int?     // Expected local draw
+  primaryGenre      String?  // Strict genre match
+  secondaryGenre    String?  // Soft genre match
   
   tracks          Track[]
   videos          Video[]
   storeItems      StoreItem[]
   events          Event[]
+
+  swipes          Swipe[]
+  matches         Match[]
 
   lastCrawledAt   DateTime?
 }
@@ -90,13 +99,98 @@ model VenueProfile {
   genres          String?
   payType         String?
   rssFeedUrl      String?
+
+  // ── Match & Book criteria ─────────────────────────────────────
+  capacity        Int?     // Room capacity / draw expectations
+  defaultBudget   Float?   // Default budget per slot
   
   claimed         Boolean  @default(false)
   lastCrawledAt   DateTime?
   
   events          Event[]
   bookingAttempts BookingAttempt[]
+  slots           Slot[]
+  swipes          Swipe[]
+  matches         Match[]
 }
+
+// ── Match & Book: Core Models ─────────────────────────────────────────────────
+
+/// An open stage slot posted by a venue that bands can swipe on
+model Slot {
+  id              String   @id @default(cuid())
+  venueId         String
+  venue           VenueProfile @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  date            DateTime
+  startTime       String?  // "9:00 PM"
+  endTime         String?  // "12:00 AM"
+  setLength       Int?     // minutes
+
+  budget          Float?   // Per-slot budget ceiling
+  targetDraw      Int?     // Minimum expected draw from the artist
+  genres          String?  // Desired genres (comma-separated)
+  notes           String?  // Stage notes, vibe, etc.
+
+  // OPEN | PROVISIONAL | BOOKED | CANCELLED
+  status          String   @default("OPEN")
+
+  swipes          Swipe[]
+  match           Match?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+/// Records every swipe action (both band→slot and venue→band)
+model Swipe {
+  id              String   @id @default(cuid())
+
+  /// "BAND" swiped on the slot, or "VENUE" swiped on the band
+  initiator       String
+
+  /// "RIGHT" = like/request, "LEFT" = pass
+  direction       String
+
+  bandId          String
+  band            BandProfile @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  venueId         String
+  venue           VenueProfile @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  slotId          String
+  slot            Slot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+
+  /// Each party can only swipe once per slot+band combination
+  @@unique([initiator, bandId, slotId])
+}
+
+/// Created when both parties mutually swipe RIGHT — triggers provisional booking
+model Match {
+  id              String   @id @default(cuid())
+
+  bandId          String
+  band            BandProfile @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  venueId         String
+  venue           VenueProfile @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  slotId          String   @unique
+  slot            Slot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  // PROVISIONAL | CONFIRMED | CANCELLED
+  status          String   @default("PROVISIONAL")
+
+  /// JSON settlement sheet: agreed pay, date, set length, contacts
+  draftContract   String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ── Existing Supporting Models ────────────────────────────────────────────────
 
 model Track {
   id            String   @id @default(cuid())

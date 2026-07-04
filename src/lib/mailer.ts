@@ -9,7 +9,7 @@ export async function sendBookingEmail(to: string, subject: string, body: string
       to: [to],
       subject: subject,
       html: body,
-      reply_to: replyTo || 'booking@rockettreelabs.com',
+      replyTo: replyTo || 'booking@rockettreelabs.com',
     });
 
     if (error) {

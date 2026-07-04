@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Music, Building2, ExternalLink, Mic2, Speaker, Guitar } from "lucide-react";
+import { Music, Building2, ExternalLink, Mic2, Speaker, Guitar, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -168,10 +168,17 @@ export default function TouringMap({ venues = [], bands = [], resources = [], ro
                 <h3 className="font-black text-lg text-pink-500 uppercase">{venue.name}</h3>
                 <p className="text-[10px] text-zinc-400 mb-2">{venue.address}</p>
                 
-                {!isProduction && (
-                   <div className="mb-3 py-2 border-t border-zinc-900">
-                     <p className="text-[10px] font-bold text-zinc-500 uppercase">{venue.bookingEmail || 'No Email'}</p>
-                   </div>
+                {venue.bookingEmail ? (
+                  <a 
+                    href={`mailto:${venue.bookingEmail}?subject=Booking Inquiry - ${venue.name}&body=Hi ${venue.contactName || 'Booking Manager'},%0D%0A%0D%0AWe are interested in booking a show at ${venue.name}.`}
+                    className="flex items-center justify-center gap-1.5 w-full py-1.5 mb-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-[10px] font-bold transition-all text-white no-underline"
+                  >
+                    <Mail className="w-3.5 h-3.5" /> EMAIL VENUE
+                  </a>
+                ) : (
+                  <div className="mb-2 py-1 text-center text-[9px] font-bold text-zinc-500 uppercase border-t border-zinc-900">
+                    No Email Listed
+                  </div>
                 )}
 
                 <Link 

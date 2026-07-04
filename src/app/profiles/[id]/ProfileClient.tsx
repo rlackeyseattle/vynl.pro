@@ -290,13 +290,23 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
                 />
               </div>
               
-              <button 
-                onClick={handleSendBooking}
-                disabled={isSending || !bookingDraft.message || !bookingDraft.dates}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black text-lg uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] flex justify-center items-center gap-2"
-              >
-                {isSending ? <Loader2 className="w-6 h-6 animate-spin" /> : "SEND INQUIRY"}
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleSendBooking}
+                  disabled={isSending || !bookingDraft.message || !bookingDraft.dates}
+                  className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black text-sm uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] flex justify-center items-center gap-2"
+                >
+                  {isSending ? <Loader2 className="w-6 h-6 animate-spin" /> : "SEND INQUIRY"}
+                </button>
+                {data.bookingEmail && (
+                  <a
+                    href={`mailto:${data.bookingEmail}?subject=Booking Inquiry for ${bookingDraft.dates || 'Upcoming Dates'}&body=${encodeURIComponent(bookingDraft.message)}`}
+                    className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] flex justify-center items-center gap-2 no-underline text-center justify-center items-center"
+                  >
+                    Open in Mail App 📧
+                  </a>
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
