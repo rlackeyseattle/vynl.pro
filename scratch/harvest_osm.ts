@@ -7,26 +7,21 @@ const prisma = new PrismaClient();
 // List of target states/cities to fetch from.
 // We select key music hubs and major cities to get high saturation of venues.
 const TARGET_CITIES = [
-  { city: "Seattle", state: "WA" },
-  { city: "Portland", state: "OR" },
+  // Failed in previous run (retry)
   { city: "Austin", state: "TX" },
-  { city: "Nashville", state: "TN" },
-  { city: "New York", state: "NY" },
-  { city: "Los Angeles", state: "CA" },
-  { city: "Chicago", state: "IL" },
-  { city: "Denver", state: "CO" },
-  { city: "New Orleans", state: "LA" },
-  { city: "San Francisco", state: "CA" },
   { city: "Bozeman", state: "MT" },
-  { city: "Missoula", state: "MT" },
-  { city: "Kalispell", state: "MT" },
-  { city: "Whitefish", state: "MT" },
   { city: "Miami", state: "FL" },
   { city: "Atlanta", state: "GA" },
   { city: "Boston", state: "MA" },
   { city: "Las Vegas", state: "NV" },
-  { city: "Minneapolis", state: "MN" },
-  { city: "Philadelphia", state: "PA" }
+  // New major music cities
+  { city: "Dallas", state: "TX" },
+  { city: "Houston", state: "TX" },
+  { city: "Phoenix", state: "AZ" },
+  { city: "San Diego", state: "CA" },
+  { city: "Detroit", state: "MI" },
+  { city: "Baltimore", state: "MD" },
+  { city: "Milwaukee", state: "WI" }
 ];
 
 // Helper to sanitize website URL
