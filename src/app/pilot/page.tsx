@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 // Colors (DaVinci Technical Sketchbook & Glowing Circuit Ink Palette)
 const OR = '#c5a059';  // Drawing gold ink
@@ -17,6 +18,9 @@ const C = '#10b981';   // Emerald active green
 const CYAN = '#06b6d4'; // Info cyan
 
 export default function PilotPage() {
+  const { data: session } = useSession();
+  const userId = session?.user ? (session.user as any).id : null;
+
   const [radius, setRadius] = useState(150);
   const [minPay, setMinPay] = useState(200);
   const [status, setStatus] = useState("IDLE");
@@ -47,7 +51,8 @@ export default function PilotPage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch("/api/pilot/status?userId=current-user-id");
+      const currentId = userId || "current-user-id";
+      const res = await fetch(`/api/pilot/status?userId=${currentId}`);
       const data = await res.json();
       if (data.success) {
         setLogs(data.logs);
@@ -153,7 +158,7 @@ export default function PilotPage() {
       const res = await fetch("/api/pilot/campaign", {
         method: "POST",
         body: JSON.stringify({
-          userId: "current-user-id",
+          userId: userId || "current-user-id",
           targetDates,
           maxRadius: radius,
           minCompensation: minPay

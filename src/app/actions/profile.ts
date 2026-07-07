@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { geocodeZip } from "@/lib/geo";
 
 export async function updateProfile(formData: {
   name?: string;
@@ -86,6 +87,12 @@ export async function updateProfile(formData: {
       }
     }
 
+    // Geocode ZIP if provided to get coords for map/distance calculations
+    let coords: { latitude: number; longitude: number } | null = null;
+    if (formData.zip) {
+      coords = await geocodeZip(formData.zip);
+    }
+
     // 1. Update User global name/bio/zip if provided
     if (formData.name || formData.bio || formData.zip) {
       await prisma.user.update({
@@ -108,6 +115,7 @@ export async function updateProfile(formData: {
           backgroundImage: formData.backgroundImage || null,
           design1Image: formData.design1Image || null,
           design2Image: formData.design2Image || null,
+          ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
           bio: formData.bio || null,
           minimumGuarantee: formData.minimumGuarantee !== undefined ? formData.minimumGuarantee : null,
           expectedDraw: formData.expectedDraw !== undefined ? formData.expectedDraw : null,
@@ -163,6 +171,7 @@ export async function updateProfile(formData: {
           eventFeedUrl: formData.eventFeedUrl || null,
           targetBandsDescription: formData.targetBandsDescription || null,
           targetBookingNights: formData.targetBookingNights || null,
+          ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
           genres: formData.genre || null, // map genre input to genres field for compatibility
           ...(finalSlug ? { slug: finalSlug } : {}),
         }
