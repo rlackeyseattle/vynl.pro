@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { getCurrentProfile } from "@/app/actions/profile";
 
 const TouringMap = dynamic(() => import("@/components/TouringMap"), { 
   ssr: false,
@@ -111,6 +112,26 @@ export default function VenuesPage() {
   const [localTransportSelected, setLocalTransportSelected] = useState(false);
   const [isContractSigned, setIsContractSigned] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Bulk Custom Emails States
+  const [artistName, setArtistName] = useState("Artist");
+  const [emailSubject, setEmailSubject] = useState("Booking Inquiry for {venue_name} - {artist_name}");
+  const [emailBody, setEmailBody] = useState("Hi {venue_name} Booking Team,\n\nWe are looking to book a show in your area around {dates}. We'd love to discuss scheduling a slot at your venue. Let us know if you have any availability.\n\nBest,\n{artist_name}");
+  const [sendingProgress, setSendingProgress] = useState<{ current: number; total: number } | null>(null);
+
+  useEffect(() => {
+    async function loadArtist() {
+      try {
+        const res = await getCurrentProfile();
+        if (res && res.profile && res.profile.name) {
+          setArtistName(res.profile.name);
+        }
+      } catch (err) {
+        console.error("Failed to load artist details for email templates:", err);
+      }
+    }
+    loadArtist();
+  }, []);
 
   // National Harvester States
   const [showHarvester, setShowHarvester] = useState(false);
@@ -200,29 +221,58 @@ export default function VenuesPage() {
 
   const handleBulkBooking = async () => {
     setIsSending(true);
-    try {
-      const res = await fetch("/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          venueIds: Array.from(selectedVenueIds),
-          dates: bookingDraft.dates,
-          message: bookingDraft.message
-        })
-      });
-      if (res.ok) {
-        alert("Booking campaigns launched successfully!");
-        setSelectedVenueIds(new Set());
-        setShowBookingModal(false);
-        setBookingDraft({ dates: "", message: "" });
-      } else {
-        alert("Failed to send bookings.");
+    const selectedList = venues.filter(v => selectedVenueIds.has(v.id));
+    const total = selectedList.length;
+    setSendingProgress({ current: 0, total });
+
+    let successCount = 0;
+
+    for (let i = 0; i < total; i++) {
+      const venue = selectedList[i];
+      const targetEmail = venue.bookingEmail || venue.contactEmail;
+      if (!targetEmail) {
+        setSendingProgress(prev => prev ? { ...prev, current: i + 1 } : null);
+        continue;
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSending(false);
+
+      // Replace merge tags dynamically
+      const customSubject = emailSubject
+        .replace(/{venue_name}/g, venue.name || "Venue")
+        .replace(/{venue_address}/g, venue.address || "")
+        .replace(/{dates}/g, bookingDraft.dates || "Upcoming Dates")
+        .replace(/{artist_name}/g, artistName);
+
+      const customBody = emailBody
+        .replace(/{venue_name}/g, venue.name || "Venue")
+        .replace(/{venue_address}/g, venue.address || "")
+        .replace(/{dates}/g, bookingDraft.dates || "Upcoming Dates")
+        .replace(/{artist_name}/g, artistName);
+
+      try {
+        const res = await fetch("/api/booking/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: targetEmail,
+            subject: customSubject,
+            body: customBody
+          })
+        });
+        if (res.ok) {
+          successCount++;
+        }
+      } catch (err) {
+        console.error("Failed to send custom email to " + venue.name, err);
+      }
+
+      setSendingProgress(prev => prev ? { ...prev, current: i + 1 } : null);
     }
+
+    alert(`Successfully dispatched ${successCount} custom booking emails!`);
+    setSelectedVenueIds(new Set());
+    setShowBookingModal(false);
+    setSendingProgress(null);
+    setIsSending(false);
   };
 
   // Canvas drawing handlers
@@ -700,13 +750,32 @@ export default function VenuesPage() {
                         className={`p-5 rounded-lg border border-[#d5cfbe] transition-all duration-200 flex flex-col justify-between`}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-                          <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer' }}>
-                            <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
-                              {venue.name}
-                            </h4>
-                            <span style={{ fontSize: '0.68rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
-                              📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
-                            </span>
+                          <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: isSelected ? C : 'transparent',
+                              border: `1.5px solid ${isSelected ? C : '#999'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: isSelected ? '#faf9f5' : '#777',
+                              fontWeight: 'black',
+                              fontSize: '0.65rem',
+                              transition: 'all 0.15s',
+                              flexShrink: 0
+                            }}>
+                              {isSelected ? '✓' : '+'}
+                            </div>
+                            <div>
+                              <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
+                                {venue.name}
+                              </h4>
+                              <span style={{ fontSize: '0.68rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
+                                📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
+                              </span>
+                            </div>
                           </div>
 
                           <span style={{
@@ -738,13 +807,13 @@ export default function VenuesPage() {
                             style={{ 
                               flex: 1, 
                               fontSize: '0.65rem', 
-                              borderColor: isSelected ? P : BORDER_COLOR,
-                              color: isSelected ? P : '#555',
-                              background: isSelected ? 'rgba(178,83,41,0.04)' : '#faf9f5'
+                              borderColor: isSelected ? C : BORDER_COLOR,
+                              color: isSelected ? C : '#555',
+                              background: isSelected ? 'rgba(95,138,107,0.04)' : '#faf9f5'
                             }}
                             className="filter-btn"
                           >
-                            {isSelected ? '✓ REMOVE ROUTE' : '+ ADD TO ROUTE'}
+                            {isSelected ? '✓ IN BOOKING LIST' : '+ ADD TO BOOKING LIST'}
                           </button>
                           
                           <button
@@ -806,7 +875,7 @@ export default function VenuesPage() {
               style={{ background: CHARCOAL, color: '#faf9f5' }}
               className="px-6 py-2 hover:opacity-90 rounded-full font-black text-xs flex items-center gap-2 uppercase tracking-wider"
             >
-              <Send className="w-3.5 h-3.5" /> Start Booking Campaign
+              <Send className="w-3.5 h-3.5" /> Email Booking List
             </button>
           </motion.div>
         )}
@@ -820,7 +889,7 @@ export default function VenuesPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="modal-sketch-box"
+              className="modal-sketch-box max-w-2xl w-full"
             >
               <button 
                 onClick={() => setShowBookingModal(false)}
@@ -831,42 +900,102 @@ export default function VenuesPage() {
               
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.8rem', borderRadius: '4px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}`, marginBottom: '0.6rem' }}>
                 <FileText size={12} color={P} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // CAMPAIGN ROUTER v2.4</span>
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // MASS CUSTOM EMAIL ROUTER v3.0</span>
               </div>
               
-              <h2 className="text-2xl font-black text-charcoal uppercase tracking-tighter mb-1" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>Deploy Booking Campaign</h2>
-              <p className="text-zinc-500 text-xs mb-8">You are about to launch automated pre-booking negotiations directly with {selectedVenueIds.size} venues simultaneously.</p>
+              <h2 className="text-2xl font-black text-charcoal uppercase tracking-tighter mb-1" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>Send Custom Booking Emails</h2>
+              <p className="text-zinc-500 text-xs mb-6">Personalize and dispatch custom booking requests to {selectedVenueIds.size} selected venues simultaneously.</p>
               
-              <div className="space-y-6">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-zinc-500 block mb-2" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Target Dates / Routing Window</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Mid-October 2026, Weekends"
-                    className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-4 py-3 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-sm"
-                    value={bookingDraft.dates}
-                    onChange={(e) => setBookingDraft(prev => ({...prev, dates: e.target.value}))}
-                  />
+              {sendingProgress ? (
+                <div className="py-12 text-center space-y-4">
+                  <Loader2 className="w-10 h-10 animate-spin text-[#c5a059] mx-auto" />
+                  <h3 className="text-sm font-black text-charcoal uppercase tracking-wider">
+                    Sending Email {sendingProgress.current} of {sendingProgress.total}
+                  </h3>
+                  <div className="w-full bg-[#f2eedf] h-2 rounded-full overflow-hidden max-w-xs mx-auto">
+                    <div 
+                      className="bg-[#c5a059] h-full transition-all duration-300"
+                      style={{ width: `${(sendingProgress.current / sendingProgress.total) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-zinc-500 block mb-2" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Pitch / Performance Specs</label>
-                  <textarea 
-                    placeholder="Introduce your act, draw, set lengths, and tech rider needs..."
-                    className="w-full h-40 bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-4 py-3 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors resize-none text-sm"
-                    value={bookingDraft.message}
-                    onChange={(e) => setBookingDraft(prev => ({...prev, message: e.target.value}))}
-                  />
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Target Tour Dates</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Mid-October 2026, Weekends"
+                        className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
+                        value={bookingDraft.dates}
+                        onChange={(e) => setBookingDraft(prev => ({...prev, dates: e.target.value}))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Your Artist Name</label>
+                      <input 
+                        type="text" 
+                        className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
+                        value={artistName}
+                        onChange={(e) => setArtistName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Custom Subject Line</label>
+                    <input 
+                      type="text" 
+                      placeholder="Subject template"
+                      className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2.5 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs font-bold"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Custom Pitch Body</label>
+                    <textarea 
+                      placeholder="Hi {venue_name}..."
+                      className="w-full h-32 bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2.5 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors resize-none text-xs font-medium"
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Merge Tags Help */}
+                  <div className="bg-[#f5f2e6] border border-[#e3dac9] p-3 rounded-xl">
+                    <div className="text-[9px] font-black uppercase text-zinc-500 mb-1.5" style={{ fontFamily: 'Share Tech Mono, monospace' }}>◈ Merge tags (auto-replaced per email):</div>
+                    <div className="flex flex-wrap gap-2 text-[10px]">
+                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{venue_name}"}</span>
+                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{venue_address}"}</span>
+                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{dates}"}</span>
+                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{artist_name}"}</span>
+                    </div>
+                  </div>
+
+                  {/* Selected Recipients Preview */}
+                  <div className="max-h-24 overflow-y-auto bg-[#faf9f5] border border-[#d5cfbe] p-3 rounded-xl space-y-1.5">
+                    <div className="text-[9px] font-black uppercase text-zinc-500" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Recipients list ({selectedVenueIds.size}):</div>
+                    {venues.filter(v => selectedVenueIds.has(v.id)).map(v => (
+                      <div key={v.id} className="text-[10px] text-zinc-600 flex justify-between font-bold">
+                        <span>{v.name}</span>
+                        <span className="font-mono text-[9px]">{v.bookingEmail || v.contactEmail || "No Email listed"}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={handleBulkBooking}
+                    disabled={isSending || !emailBody || !emailSubject || !bookingDraft.dates}
+                    style={{ background: C, border: `2px solid ${C}` }}
+                    className="w-full py-3.5 disabled:opacity-50 text-white font-black text-xs uppercase rounded-xl transition-all flex justify-center items-center gap-2 tracking-wider"
+                  >
+                    DISPATCH MASS CUSTOM EMAILS
+                  </button>
                 </div>
-                
-                <button 
-                  onClick={handleBulkBooking}
-                  disabled={isSending || !bookingDraft.message || !bookingDraft.dates}
-                  style={{ background: C, border: `2px solid ${C}` }}
-                  className="w-full py-4 disabled:opacity-50 text-white font-black text-sm uppercase rounded-xl transition-all flex justify-center items-center gap-2 tracking-wider"
-                >
-                  {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : "DEPLOY DRAFT CAMPAIGN"}
-                </button>
-              </div>
+              )}
             </motion.div>
           </div>
         )}
