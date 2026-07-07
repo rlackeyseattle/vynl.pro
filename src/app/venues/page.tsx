@@ -761,12 +761,12 @@ export default function VenuesPage() {
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: isSelected ? '#faf9f5' : '#777',
-                              fontWeight: 'black',
+                              fontWeight: 700,
                               fontSize: '0.65rem',
                               transition: 'all 0.15s',
                               flexShrink: 0
                             }}>
-                              {isSelected ? '✓' : '+'}
+                              {isSelected ? <Check size={10} /> : <Plus size={10} />}
                             </div>
                             <div>
                               <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
@@ -809,11 +809,15 @@ export default function VenuesPage() {
                               fontSize: '0.65rem', 
                               borderColor: isSelected ? C : BORDER_COLOR,
                               color: isSelected ? C : '#555',
-                              background: isSelected ? 'rgba(95,138,107,0.04)' : '#faf9f5'
+                              background: isSelected ? 'rgba(95,138,107,0.04)' : '#faf9f5',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
                             }}
                             className="filter-btn"
                           >
-                            {isSelected ? '✓ IN BOOKING LIST' : '+ ADD TO BOOKING LIST'}
+                            {isSelected ? <><Check size={10} /> IN BOOKING LIST</> : <><Plus size={10} /> ADD TO BOOKING LIST</>}
                           </button>
                           
                           <button
