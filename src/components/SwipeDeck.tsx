@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Heart, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap, Check } from "lucide-react";
+import { X, Briefcase, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap, Check } from "lucide-react";
 import { useCardDeck } from "@/hooks/useCardDeck";
 import { getDiscoveryFeed } from "@/app/actions/swipe";
 import { DraftContract } from "@/app/actions/swipe";
@@ -31,19 +31,19 @@ function MatchOverlay({
       />
 
       {/* Card */}
-      <div className="relative w-full max-w-md bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(236,72,153,0.4)] animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(197,160,89,0.2)] animate-in zoom-in-95 duration-300">
         {/* Glow burst */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-600/10 via-transparent to-indigo-600/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#c5a059]/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative p-8 text-center">
           {/* Emoji burst */}
-          <div className="text-7xl mb-4 animate-bounce">🎶</div>
+          <div className="text-7xl mb-4 animate-bounce">📋</div>
 
-          <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 mb-1">
-            IT&apos;S A MATCH!
+          <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#c5a059] to-[#f3d085] mb-1">
+            TERMS COMPILED!
           </div>
           <p className="text-zinc-400 text-sm mb-6">
-            You&apos;ve got a provisional booking. Review the details below.
+            Booking terms have been provisionally drafted. Review the settlement sheet.
           </p>
 
           {/* Settlement sheet */}
@@ -93,8 +93,8 @@ function MatchOverlay({
           <div className="flex gap-3">
             {contract.venueEmail && (
               <a
-                href={`mailto:${contract.venueEmail}?subject=Match Confirmed – ${contract.venueName}&body=Hi! We matched on vynl.pro for ${new Date(contract.date).toLocaleDateString()}. Looking forward to discussing details!`}
-                className="flex-1 py-3 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 rounded-xl text-white font-bold text-sm transition-all shadow-lg text-center"
+                href={`mailto:${contract.venueEmail}?subject=Booking Proposal – ${contract.venueName}&body=Hi! We connected on vynl.pro for ${new Date(contract.date).toLocaleDateString()}. Looking forward to discussing details!`}
+                className="flex-1 py-3 bg-gradient-to-r from-[#c5a059] to-[#a88242] text-black font-bold text-sm transition-all shadow-lg text-center rounded-xl hover:brightness-110"
               >
                 Send Email 📧
               </a>
@@ -103,7 +103,7 @@ function MatchOverlay({
               onClick={onClose}
               className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-300 font-bold text-sm transition-all"
             >
-              Keep Swiping
+              Review Next Slot
             </button>
           </div>
         </div>
@@ -138,7 +138,7 @@ function SlotCard({ card, isNext }: { card: Card; isNext?: boolean }) {
       <div className="absolute inset-0 flex flex-col justify-end p-6">
         {/* Venue type badge */}
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-3 py-1 rounded-full bg-pink-600/90 text-white text-xs font-black uppercase tracking-widest">
+          <span className="px-3 py-1 rounded-full bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30 text-xs font-black uppercase tracking-widest">
             {venue.venueType ?? "Live Venue"}
           </span>
           {card.status === "OPEN" && (
@@ -155,14 +155,14 @@ function SlotCard({ card, isNext }: { card: Card; isNext?: boolean }) {
 
         {/* Location */}
         <div className="flex items-center gap-1 text-zinc-400 text-sm mb-4">
-          <MapPin className="w-3.5 h-3.5 text-pink-400" />
+          <MapPin className="w-3.5 h-3.5 text-[#c5a059]" />
           <span>{venue.address ?? "Location TBD"}</span>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Calendar className="w-4 h-4 text-indigo-400 mx-auto mb-1" />
+            <Calendar className="w-4 h-4 text-[#c5a059] mx-auto mb-1" />
             <div className="text-white font-bold text-xs">{dateStr}</div>
           </div>
 
@@ -190,7 +190,7 @@ function SlotCard({ card, isNext }: { card: Card; isNext?: boolean }) {
               .map((g: string) => (
                 <span
                   key={g.trim()}
-                  className="px-2 py-0.5 rounded-full bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs"
+                  className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[#c5a059] text-xs"
                 >
                   {g.trim()}
                 </span>
@@ -237,7 +237,7 @@ function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
         {/* Genre badge */}
         <div className="flex items-center gap-2 mb-4">
           {card.primaryGenre && (
-            <span className="px-3 py-1 rounded-full bg-indigo-600/90 text-white text-xs font-black uppercase tracking-widest">
+            <span className="px-3 py-1 rounded-full bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30 text-xs font-black uppercase tracking-widest">
               {card.primaryGenre}
             </span>
           )}
@@ -253,7 +253,7 @@ function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
 
         {/* Location */}
         <div className="flex items-center gap-1 text-zinc-400 text-sm mb-4">
-          <MapPin className="w-3.5 h-3.5 text-indigo-400" />
+          <MapPin className="w-3.5 h-3.5 text-[#c5a059]" />
           <span>{card.location ?? "Location unknown"}</span>
         </div>
 
@@ -268,7 +268,7 @@ function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
           </div>
 
           <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Users className="w-4 h-4 text-pink-400 mx-auto mb-1" />
+            <Users className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
             <div className="text-white font-bold text-sm">
               {card.expectedDraw ?? "?"}
             </div>
@@ -287,8 +287,8 @@ function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
         {/* Track preview */}
         {firstTrack && (
           <div className="flex items-center gap-3 bg-black/40 backdrop-blur-sm border border-zinc-700/40 rounded-xl p-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-600 to-indigo-600 flex items-center justify-center flex-shrink-0">
-              <Music2 className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+              <Music2 className="w-4 h-4 text-[#c5a059]" />
             </div>
             <div className="min-w-0">
               <div className="text-white text-xs font-bold truncate">{firstTrack.title}</div>
@@ -308,11 +308,11 @@ function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
 function EmptyState({ role }: { role: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-8">
-      <div className="text-6xl mb-6">🎸</div>
-      <h3 className="text-2xl font-black text-white mb-2">You&apos;ve seen it all</h3>
+      <div className="text-6xl mb-6">📅</div>
+      <h3 className="text-2xl font-black text-white mb-2">Queue Evaluated</h3>
       <p className="text-zinc-400 text-sm leading-relaxed">
         {role === "BAND"
-          ? "No more open slots in your area right now. Check back soon or expand your radius."
+          ? "All matching routing slots in this radius have been evaluated. Adjust parameters or check back soon."
           : "No more bands match your criteria. Try adjusting your search."}
       </p>
     </div>
@@ -383,9 +383,9 @@ export function SwipeDeck({ initialCards, role, radiusMiles = 100 }: SwipeDeckPr
       <div className="flex flex-col items-center justify-center h-full select-none">
         {/* Card count */}
         <div className="mb-4 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-pink-400" />
+          <Zap className="w-4 h-4 text-[#c5a059]" />
           <span className="text-zinc-400 text-sm font-medium">
-            {remaining > 0 ? `${remaining} cards in your queue` : "Queue empty"}
+            {remaining > 0 ? `${remaining} targets in queue` : "Queue empty"}
           </span>
         </div>
 
@@ -417,27 +417,27 @@ export function SwipeDeck({ initialCards, role, radiusMiles = 100 }: SwipeDeckPr
             <button
               onClick={doLeft}
               disabled={isSwiping}
-              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-red-500 hover:bg-red-950/30 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-red-900/30 active:scale-90 disabled:opacity-50"
+              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-zinc-900/30 active:scale-90 disabled:opacity-50"
             >
-              <X className="w-7 h-7 text-zinc-400 hover:text-red-400" />
+              <X className="w-7 h-7 text-zinc-400 hover:text-white" />
             </button>
 
             {/* Like */}
             <button
               onClick={doRight}
               disabled={isSwiping}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 flex items-center justify-center transition-all duration-200 shadow-[0_0_30px_rgba(236,72,153,0.4)] hover:shadow-[0_0_50px_rgba(236,72,153,0.7)] active:scale-90 disabled:opacity-50"
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-[#c5a059] to-[#a88242] hover:brightness-110 flex items-center justify-center transition-all duration-200 shadow-[0_0_30px_rgba(197,160,89,0.3)] hover:shadow-[0_0_50px_rgba(197,160,89,0.5)] active:scale-90 disabled:opacity-50"
             >
-              <Check className="w-9 h-9 text-white stroke-[3px]" />
+              <Check className="w-9 h-9 text-black stroke-[3px]" />
             </button>
 
             {/* Skip (same as pass but labeled) */}
             <button
               onClick={doLeft}
               disabled={isSwiping}
-              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-amber-500 hover:bg-amber-950/30 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-amber-900/30 active:scale-90 disabled:opacity-50"
+              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-[#c5a059] hover:bg-[#c5a059]/10 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-zinc-900/30 active:scale-90 disabled:opacity-50"
             >
-              <Music2 className="w-6 h-6 text-zinc-400 hover:text-amber-400" />
+              <Music2 className="w-6 h-6 text-zinc-400 hover:text-[#c5a059]" />
             </button>
           </div>
         )}
@@ -445,7 +445,7 @@ export function SwipeDeck({ initialCards, role, radiusMiles = 100 }: SwipeDeckPr
         {/* Hint text */}
         {currentCard && (
           <p className="text-zinc-600 text-xs mt-4 text-center">
-            ← Pass &nbsp;|&nbsp; Book It →
+            ← Skip Slot &nbsp;|&nbsp; Request Booking →
           </p>
         )}
       </div>

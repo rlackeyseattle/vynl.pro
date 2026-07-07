@@ -3,11 +3,11 @@ import { authOptions } from "@/lib/auth";
 import { getDiscoveryFeed } from "@/app/actions/swipe";
 import { SwipeDeck } from "@/components/SwipeDeck";
 import { redirect } from "next/navigation";
-import { Zap, Heart, Music2 } from "lucide-react";
+import { Zap, Briefcase, Music2 } from "lucide-react";
 
 export const metadata = {
-  title: "Match & Book | vynl.pro",
-  description: "Tinder-style discovery engine connecting bands with venues. Swipe to book.",
+  title: "Direct Booking Deck | vynl.pro",
+  description: "Professional tour routing and booking deck connecting bands with venues. Evaluate open dates, payout terms, and request slots directly.",
 };
 
 export default async function DiscoverPage() {
@@ -27,29 +27,29 @@ export default async function DiscoverPage() {
       <div className="border-b border-zinc-800/60 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-600 to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.4)]">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#c5a059] to-[#a88242] flex items-center justify-center shadow-[0_0_20px_rgba(197,160,89,0.3)]">
+              <Zap className="w-5 h-5 text-black" />
             </div>
             <h1 className="text-3xl font-black text-white tracking-tight">
-              Match &amp; Book
+              Direct Booking Deck
             </h1>
           </div>
           <p className="text-zinc-400 text-sm max-w-md mx-auto">
             {role === "BAND"
-              ? "Discover open stage slots near you. Swipe right to send your EPK."
-              : "Find your next headliner. Swipe right to send a booking invite."}
+              ? "Evaluate verified routing slots in your radius. Propose your EPK to lock in dates."
+              : "Review matching talent for your open dates. Send a direct booking request."}
           </p>
 
           {/* Role pill */}
           <div className="inline-flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-700 text-sm">
             {role === "BAND" ? (
               <>
-                <Music2 className="w-4 h-4 text-indigo-400" />
+                <Music2 className="w-4 h-4 text-[#c5a059]" />
                 <span className="text-zinc-300 font-medium">Artist Mode</span>
               </>
             ) : (
               <>
-                <Heart className="w-4 h-4 text-pink-400" />
+                <Briefcase className="w-4 h-4 text-[#c5a059]" />
                 <span className="text-zinc-300 font-medium">Venue Mode</span>
               </>
             )}
@@ -66,7 +66,7 @@ export default async function DiscoverPage() {
             <p className="text-zinc-400 text-sm max-w-xs">{feedError}</p>
             <a
               href={role === "BAND" ? "/onboarding" : "/venues"}
-              className="mt-6 px-6 py-3 bg-gradient-to-r from-pink-600 to-indigo-600 rounded-full text-white font-bold text-sm"
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-[#c5a059] to-[#a88242] text-black font-bold text-sm rounded-full shadow-[0_0_15px_rgba(197,160,89,0.3)] hover:brightness-110"
             >
               Update My Profile
             </a>
@@ -85,15 +85,15 @@ export default async function DiscoverPage() {
         <div className="max-w-sm mx-auto grid grid-cols-3 gap-3 text-center">
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-3">
             <div className="text-2xl mb-1">❌</div>
-            <div className="text-zinc-400 text-xs">Pass</div>
+            <div className="text-zinc-400 text-xs">Skip Slot</div>
           </div>
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-3">
             <div className="text-2xl mb-1">🎶</div>
-            <div className="text-zinc-400 text-xs">Match = Draft Contract</div>
+            <div className="text-zinc-400 text-xs">Fit = Draft Contract</div>
           </div>
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-3">
-            <div className="text-2xl mb-1">❤️</div>
-            <div className="text-zinc-400 text-xs">Book It</div>
+            <div className="text-2xl mb-1">⚡</div>
+            <div className="text-zinc-400 text-xs">Request Booking</div>
           </div>
         </div>
       </div>
