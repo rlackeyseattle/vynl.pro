@@ -9,11 +9,14 @@ export async function updateProfile(formData: {
   name?: string;
   bio?: string;
   slug?: string;
+  zip?: string;
   // Band fields
   genre?: string;
   profileImage?: string;
   headerImage?: string;
   backgroundImage?: string;
+  design1Image?: string;
+  design2Image?: string;
   minimumGuarantee?: number;
   expectedDraw?: number;
   isTouring?: boolean;
@@ -83,13 +86,14 @@ export async function updateProfile(formData: {
       }
     }
 
-    // 1. Update User global name/bio if provided
-    if (formData.name || formData.bio) {
+    // 1. Update User global name/bio/zip if provided
+    if (formData.name || formData.bio || formData.zip) {
       await prisma.user.update({
         where: { id: userId },
         data: {
           ...(formData.name ? { name: formData.name } : {}),
           ...(formData.bio ? { bio: formData.bio } : {}),
+          ...(formData.zip ? { zip: formData.zip } : {}),
         }
       });
     }
@@ -102,6 +106,8 @@ export async function updateProfile(formData: {
           profileImage: formData.profileImage || null,
           headerImage: formData.headerImage || null,
           backgroundImage: formData.backgroundImage || null,
+          design1Image: formData.design1Image || null,
+          design2Image: formData.design2Image || null,
           bio: formData.bio || null,
           minimumGuarantee: formData.minimumGuarantee !== undefined ? formData.minimumGuarantee : null,
           expectedDraw: formData.expectedDraw !== undefined ? formData.expectedDraw : null,
