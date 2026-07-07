@@ -100,11 +100,12 @@ async function main() {
       }
     });
 
+    const { name, ...bandProfileData } = b;
     await prisma.bandProfile.upsert({
       where: { userId: user.id },
-      update: b,
+      update: bandProfileData,
       create: {
-        ...b,
+        ...bandProfileData,
         userId: user.id,
       }
     });
