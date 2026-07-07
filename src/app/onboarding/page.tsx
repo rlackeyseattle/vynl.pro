@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Music, Image as ImageIcon, Calendar, ChevronRight, ChevronLeft, 
   Save, Loader2, Sparkles, Building, Link as LinkIcon, DollarSign,
-  AlertCircle
+  AlertCircle, Clock, Tag, AlignLeft
 } from "lucide-react";
 import { updateProfile } from "@/app/actions/profile";
+import { createSlot } from "@/app/actions/swipe";
 import ImageUploader from "@/components/ImageUploader";
 
 export default function OnboardingPage() {
@@ -44,6 +45,7 @@ export default function OnboardingPage() {
     expectedDraw: "",
     isTouring: false,
     bandRider: "",
+    targetDates: "", // Band available tour routing dates (e.g. "2026-08-15, 2026-09-04")
 
     // Venue identity
     venueType: "Club",
@@ -57,7 +59,15 @@ export default function OnboardingPage() {
     // Venue specs
     ageRequirement: "21+",
     targetBandsDescription: "",
-    website: ""
+    website: "",
+
+    // Venue open slot creation fields
+    slotDate: "",
+    slotStartTime: "9:00 PM",
+    slotEndTime: "12:00 AM",
+    slotBudget: "",
+    slotGenres: "",
+    slotNotes: ""
   });
 
   // Pre-fill user details from session once loaded
@@ -125,7 +135,6 @@ export default function OnboardingPage() {
         dataToSave.expectedDraw = formData.expectedDraw ? parseInt(formData.expectedDraw) : undefined;
         dataToSave.isTouring = formData.isTouring;
         dataToSave.bandRider = formData.bandRider;
-        // Generate custom URL slug based on band name
         dataToSave.slug = formData.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
       } else {
         dataToSave.venueType = formData.venueType;
@@ -145,11 +154,42 @@ export default function OnboardingPage() {
 
       if (!res.success) {
         setError(res.error || "Failed to save profile");
-      } else {
-        // Redirect to new custom profile URL or dashboard
-        router.push(res.slug ? `/${res.slug}` : "/dashboard");
-        router.refresh();
+        setSaving(false);
+        return;
       }
+
+      // If BAND: create Autopilot Booking Campaign with target tour dates
+      if (isBand && formData.targetDates) {
+        const parsedDates = formData.targetDates.split(",").map(d => d.trim()).filter(Boolean);
+        if (parsedDates.length > 0) {
+          await fetch("/api/pilot/campaign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: (session.user as any).id,
+              targetDates: parsedDates,
+              maxRadius: 100,
+              minCompensation: formData.minimumGuarantee ? parseFloat(formData.minimumGuarantee) : 150
+            })
+          });
+        }
+      }
+
+      // If VENUE: post first open booking slot
+      if (!isBand && formData.slotDate) {
+        await createSlot({
+          date: formData.slotDate,
+          startTime: formData.slotStartTime,
+          endTime: formData.slotEndTime,
+          budget: formData.slotBudget ? parseFloat(formData.slotBudget) : undefined,
+          genres: formData.slotGenres || formData.genre,
+          notes: formData.slotNotes
+        });
+      }
+
+      // Redirect to new profile dashboard
+      router.push(res.slug ? `/${res.slug}` : "/discover");
+      router.refresh();
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
     } finally {
@@ -459,6 +499,22 @@ export default function OnboardingPage() {
                 {isBand ? (
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-cyan-400" /> Target Booking / Tour Routing Dates
+                        </label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. 2026-10-12, 2026-11-05, 2026-11-06"
+                          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-650"
+                          value={formData.targetDates}
+                          onChange={(e) => setFormData({...formData, targetDates: e.target.value})}
+                        />
+                        <p className="text-[10px] text-zinc-500">
+                          Comma-separated tour dates (YYYY-MM-DD) you want Vynl Pro Autopilot to query.
+                        </p>
+                      </div>
+
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
                           Minimum Guarantee Floor ($)
@@ -516,7 +572,85 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
+                    {/* Post Slot Form */}
+                    <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-4">
+                      <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" /> Post Your First Open Booking Slot (Optional)
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Slot Date</label>
+                          <input 
+                            type="date" 
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                            value={formData.slotDate}
+                            onChange={(e) => setFormData({...formData, slotDate: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Guaranteed Budget ($)</label>
+                          <input 
+                            type="number" 
+                            placeholder="e.g. 500"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                            value={formData.slotBudget}
+                            onChange={(e) => setFormData({...formData, slotBudget: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-zinc-500" /> Timing Slot
+                          </label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="text" 
+                              placeholder="9:00 PM"
+                              className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                              value={formData.slotStartTime}
+                              onChange={(e) => setFormData({...formData, slotStartTime: e.target.value})}
+                            />
+                            <input 
+                              type="text" 
+                              placeholder="12:00 AM"
+                              className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                              value={formData.slotEndTime}
+                              onChange={(e) => setFormData({...formData, slotEndTime: e.target.value})}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                            <Tag className="w-3 h-3 text-zinc-500" /> Target Genres
+                          </label>
+                          <input 
+                            type="text" 
+                            placeholder="Rock, Acoustic, Indie"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                            value={formData.slotGenres}
+                            onChange={(e) => setFormData({...formData, slotGenres: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-1 md:col-span-2">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                            <AlignLeft className="w-3 h-3 text-zinc-500" /> Stage Notes / Special Requests
+                          </label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. PA system provided, 3 vocal mics required..."
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                            value={formData.slotNotes}
+                            onChange={(e) => setFormData({...formData, slotNotes: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Age Requirement</label>
@@ -547,7 +681,7 @@ export default function OnboardingPage() {
                           Target Artists & Style Preferences
                         </label>
                         <textarea 
-                          rows={4}
+                          rows={3}
                           className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500 resize-none placeholder-zinc-650"
                           placeholder="Describe the genres, performance styles, draws, and sound vibes you typically book at your venue..."
                           value={formData.targetBandsDescription}

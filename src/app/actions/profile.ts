@@ -190,3 +190,26 @@ export async function updateProfile(formData: {
     return { success: false, error: error.message || "Internal server error" };
   }
 }
+
+export async function getCurrentProfile() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
+
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+
+  if (role === "BAND") {
+    const band = await prisma.bandProfile.findUnique({
+      where: { userId },
+      include: { user: true }
+    });
+    return { role, profile: band };
+  } else {
+    const venue = await prisma.venueProfile.findUnique({
+      where: { userId },
+      include: { user: true }
+    });
+    return { role, profile: venue };
+  }
+}
+

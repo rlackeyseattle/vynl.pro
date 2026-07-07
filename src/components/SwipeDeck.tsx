@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { X, Briefcase, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap, Check } from "lucide-react";
-import { useCardDeck } from "@/hooks/useCardDeck";
-import { getDiscoveryFeed } from "@/app/actions/swipe";
-import { DraftContract } from "@/app/actions/swipe";
-import type { Card } from "@/hooks/useCardDeck";
+import { useState, useEffect } from "react";
+import { X, Briefcase, MapPin, DollarSign, Users, Music2, Calendar, Clock, Zap, Check, ChevronDown, ChevronUp, SlidersHorizontal, Loader2, Sparkles, Star } from "lucide-react";
+import { handleSwipe, DraftContract, getDiscoveryFeed } from "@/app/actions/swipe";
+import { getCurrentProfile } from "@/app/actions/profile";
+import { calculateMatch, MatchResult } from "@/lib/matchmaker";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Match Overlay
+// Match Overlay (Provisional Contract)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MatchOverlay({
@@ -24,59 +23,55 @@ function MatchOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        className="absolute inset-0 bg-black/85 backdrop-blur-md"
         onClick={onClose}
       />
 
-      {/* Card */}
-      <div className="relative w-full max-w-md bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(197,160,89,0.2)] animate-in zoom-in-95 duration-300">
-        {/* Glow burst */}
+      <div className="relative w-full max-w-md bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-700/60 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(197,160,89,0.25)] animate-in zoom-in-95 duration-300">
         <div className="absolute inset-0 bg-gradient-to-br from-[#c5a059]/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative p-8 text-center">
-          {/* Emoji burst */}
           <div className="text-7xl mb-4 animate-bounce">📋</div>
 
-          <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#c5a059] to-[#f3d085] mb-1">
+          <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#c5a059] to-[#f3d085] mb-1 tracking-tight">
             TERMS COMPILED!
           </div>
           <p className="text-zinc-400 text-sm mb-6">
-            Booking terms have been provisionally drafted. Review the settlement sheet.
+            Provisional tour routing terms have been locked. Review the draft contract below.
           </p>
 
-          {/* Settlement sheet */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-left space-y-3 mb-6">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
-              Draft Settlement Sheet
+          <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-5 text-left space-y-3.5 mb-6 font-mono text-xs font-mono">
+            <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2">
+              DRAFT SETTLEMENT DETAILS
             </h3>
 
             <div className="flex justify-between items-center">
-              <span className="text-zinc-400 text-sm">🎸 Band</span>
-              <span className="font-bold text-white text-sm">{contract.bandName}</span>
+              <span className="text-zinc-500">🎸 ARTIST</span>
+              <span className="font-bold text-white">{contract.bandName}</span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-zinc-400 text-sm">🏛️ Venue</span>
-              <span className="font-bold text-white text-sm">{contract.venueName}</span>
+              <span className="text-zinc-500">🏛️ VENUE</span>
+              <span className="font-bold text-white">{contract.venueName}</span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-zinc-400 text-sm">📅 Date</span>
-              <span className="font-bold text-white text-sm">
+              <span className="text-zinc-500">📅 DATE</span>
+              <span className="font-bold text-white">
                 {new Date(contract.date).toLocaleDateString("en-US", {
                   weekday: "short",
                   month: "short",
                   day: "numeric",
+                  year: "numeric"
                 })}
               </span>
             </div>
 
             {contract.startTime && (
               <div className="flex justify-between items-center">
-                <span className="text-zinc-400 text-sm">⏰ Set Time</span>
-                <span className="font-bold text-white text-sm">
+                <span className="text-zinc-500">⏰ TIME SLOT</span>
+                <span className="font-bold text-white">
                   {contract.startTime}
                   {contract.endTime ? ` – ${contract.endTime}` : ""}
                 </span>
@@ -84,26 +79,25 @@ function MatchOverlay({
             )}
 
             <div className="flex justify-between items-center border-t border-zinc-800 pt-3 mt-2">
-              <span className="text-zinc-400 text-sm">💵 Agreed Pay</span>
-              <span className="font-black text-2xl text-emerald-400">{payDisplay}</span>
+              <span className="text-zinc-500">💵 BUDGET/PAY</span>
+              <span className="font-black text-lg text-emerald-400">{payDisplay}</span>
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             {contract.venueEmail && (
               <a
-                href={`mailto:${contract.venueEmail}?subject=Booking Proposal – ${contract.venueName}&body=Hi! We connected on vynl.pro for ${new Date(contract.date).toLocaleDateString()}. Looking forward to discussing details!`}
-                className="flex-1 py-3 bg-gradient-to-r from-[#c5a059] to-[#a88242] text-black font-bold text-sm transition-all shadow-lg text-center rounded-xl hover:brightness-110"
+                href={`mailto:${contract.venueEmail}?subject=Booking Proposal – ${contract.venueName}&body=Hi! We matched on vynl.pro for the date of ${new Date(contract.date).toLocaleDateString()}. Let's compile details!`}
+                className="flex-1 py-3.5 bg-[#c5a059] hover:bg-[#d4b06a] text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(197,160,89,0.3)] hover:scale-[1.02] text-center"
               >
-                Send Email 📧
+                OPEN IN MAIL 📧
               </a>
             )}
             <button
               onClick={onClose}
-              className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-300 font-bold text-sm transition-all"
+              className="flex-1 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black text-xs uppercase tracking-wider rounded-xl transition-all"
             >
-              Review Next Slot
+              DISMISS DECK
             </button>
           </div>
         </div>
@@ -113,342 +107,411 @@ function MatchOverlay({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Slot Card (Bands see these)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function SlotCard({ card, isNext }: { card: Card; isNext?: boolean }) {
-  const venue = card.venue;
-  const dateStr = new Date(card.date).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
-
-  return (
-    <div
-      className={`absolute inset-0 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl transition-all duration-200 ${
-        isNext ? "scale-95 opacity-60 -z-10" : "z-10"
-      }`}
-      style={{
-        background: venue.interiorImage
-          ? `linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.2) 100%), url(${venue.interiorImage}) center/cover no-repeat`
-          : "linear-gradient(135deg, #18181b 0%, #0a0a12 100%)",
-      }}
-    >
-      <div className="absolute inset-0 flex flex-col justify-end p-6">
-        {/* Venue type badge */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="px-3 py-1 rounded-full bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30 text-xs font-black uppercase tracking-widest">
-            {venue.venueType ?? "Live Venue"}
-          </span>
-          {card.status === "OPEN" && (
-            <span className="px-3 py-1 rounded-full bg-emerald-600/90 text-white text-xs font-bold">
-              Open Slot
-            </span>
-          )}
-        </div>
-
-        {/* Venue name */}
-        <h2 className="text-3xl font-black text-white leading-tight mb-1">
-          {venue.name}
-        </h2>
-
-        {/* Location */}
-        <div className="flex items-center gap-1 text-zinc-400 text-sm mb-4">
-          <MapPin className="w-3.5 h-3.5 text-[#c5a059]" />
-          <span>{venue.address ?? "Location TBD"}</span>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Calendar className="w-4 h-4 text-[#c5a059] mx-auto mb-1" />
-            <div className="text-white font-bold text-xs">{dateStr}</div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <DollarSign className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-            <div className="text-white font-bold text-sm">
-              {card.budget ? `$${card.budget}` : "Negotiable"}
-            </div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Users className="w-4 h-4 text-orange-400 mx-auto mb-1" />
-            <div className="text-white font-bold text-sm">
-              {venue.capacity ? `${venue.capacity} cap` : "Open"}
-            </div>
-          </div>
-        </div>
-
-        {/* Genres */}
-        {card.genres && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {card.genres
-              .split(",")
-              .slice(0, 4)
-              .map((g: string) => (
-                <span
-                  key={g.trim()}
-                  className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[#c5a059] text-xs"
-                >
-                  {g.trim()}
-                </span>
-              ))}
-          </div>
-        )}
-
-        {/* Time */}
-        {card.startTime && (
-          <div className="flex items-center gap-1 text-zinc-500 text-xs">
-            <Clock className="w-3 h-3" />
-            <span>
-              {card.startTime}
-              {card.endTime ? ` – ${card.endTime}` : ""}
-              {card.setLength ? ` (${card.setLength} min set)` : ""}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Band Card (Venues see these)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function BandCard({ card, isNext }: { card: Card; isNext?: boolean }) {
-  const name = card.user?.name ?? "Unknown Artist";
-  const firstTrack = card.tracks?.[0];
-
-  return (
-    <div
-      className={`absolute inset-0 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl transition-all duration-200 ${
-        isNext ? "scale-95 opacity-60 -z-10" : "z-10"
-      }`}
-      style={{
-        background: card.headerImage
-          ? `linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%), url(${card.headerImage}) center/cover no-repeat`
-          : "linear-gradient(135deg, #18181b 0%, #0a0a12 100%)",
-      }}
-    >
-      <div className="absolute inset-0 flex flex-col justify-end p-6">
-        {/* Genre badge */}
-        <div className="flex items-center gap-2 mb-4">
-          {card.primaryGenre && (
-            <span className="px-3 py-1 rounded-full bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30 text-xs font-black uppercase tracking-widest">
-              {card.primaryGenre}
-            </span>
-          )}
-          {card.coverOrOriginal && (
-            <span className="px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold">
-              {card.coverOrOriginal}
-            </span>
-          )}
-        </div>
-
-        {/* Name */}
-        <h2 className="text-3xl font-black text-white leading-tight mb-1">{name}</h2>
-
-        {/* Location */}
-        <div className="flex items-center gap-1 text-zinc-400 text-sm mb-4">
-          <MapPin className="w-3.5 h-3.5 text-[#c5a059]" />
-          <span>{card.location ?? "Location unknown"}</span>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <DollarSign className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-            <div className="text-white font-bold text-xs">
-              {card.minimumGuarantee ? `$${card.minimumGuarantee}` : "Flexible"}
-            </div>
-            <div className="text-zinc-500 text-[10px]">Min Pay</div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Users className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
-            <div className="text-white font-bold text-sm">
-              {card.expectedDraw ?? "?"}
-            </div>
-            <div className="text-zinc-500 text-[10px]">Draw</div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 text-center">
-            <Music2 className="w-4 h-4 text-orange-400 mx-auto mb-1" />
-            <div className="text-white font-bold text-xs">
-              {card.yearsPerforming ? `${card.yearsPerforming}yr` : "–"}
-            </div>
-            <div className="text-zinc-500 text-[10px]">Exp</div>
-          </div>
-        </div>
-
-        {/* Track preview */}
-        {firstTrack && (
-          <div className="flex items-center gap-3 bg-black/40 backdrop-blur-sm border border-zinc-700/40 rounded-xl p-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-              <Music2 className="w-4 h-4 text-[#c5a059]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-white text-xs font-bold truncate">{firstTrack.title}</div>
-              <div className="text-zinc-500 text-[10px]">Sample track</div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Empty State
-// ─────────────────────────────────────────────────────────────────────────────
-
-function EmptyState({ role }: { role: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-8">
-      <div className="text-6xl mb-6">📅</div>
-      <h3 className="text-2xl font-black text-white mb-2">Queue Evaluated</h3>
-      <p className="text-zinc-400 text-sm leading-relaxed">
-        {role === "BAND"
-          ? "All matching routing slots in this radius have been evaluated. Adjust parameters or check back soon."
-          : "No more bands match your criteria. Try adjusting your search."}
-      </p>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Main Swipe Deck Component
+// Main Booking Matchboard Component
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface SwipeDeckProps {
-  initialCards: Card[];
+  initialCards: any[];
   role: "BAND" | "VENUE";
   radiusMiles?: number;
 }
 
-export function SwipeDeck({ initialCards, role, radiusMiles = 100 }: SwipeDeckProps) {
+export function SwipeDeck({ initialCards, role, radiusMiles: initialRadius = 100 }: SwipeDeckProps) {
+  const [cards, setCards] = useState<any[]>(initialCards);
+  const [myProfile, setMyProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Filter States
+  const [radius, setRadius] = useState<number>(initialRadius);
+  const [minPay, setMinPay] = useState<number>(0);
+  const [genreQuery, setGenreQuery] = useState<string>("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Overlay state
   const [matchData, setMatchData] = useState<DraftContract | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const handleMatch = (matchId: string, contractJson: string) => {
+  useEffect(() => {
+    async function loadMyProfile() {
+      try {
+        const res = await getCurrentProfile();
+        if (res && res.profile) {
+          setMyProfile(res.profile);
+          if (role === "BAND" && res.profile.minimumGuarantee) {
+            setMinPay(res.profile.minimumGuarantee);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load user profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadMyProfile();
+  }, [role]);
+
+  const handleRequestBooking = async (card: any) => {
+    if (processingId) return;
+    setProcessingId(card.id);
+    
+    // Slot ID logic: Band swipes on Slot, Venue swipes on Band
+    const slotId = role === "BAND" ? card.id : (card._activeSlotId ?? "");
+    const bandId = role === "VENUE" ? card.id : (myProfile?.id ?? "");
+
     try {
-      const parsed = JSON.parse(contractJson) as DraftContract;
-      setMatchData(parsed);
-    } catch {
-      setMatchData({ matchId, bandName: "Band", venueName: "Venue", date: new Date().toISOString(), agreedPay: null, setLength: null, startTime: null, endTime: null, bandEmail: "", venueEmail: null, venueAddress: "", generatedAt: new Date().toISOString() });
+      const result = await handleSwipe(slotId, bandId, "RIGHT");
+      if (result.success) {
+        if (result.matched && result.matchId && result.draftContract) {
+          try {
+            const parsed = JSON.parse(result.draftContract) as DraftContract;
+            setMatchData(parsed);
+          } catch {
+            setMatchData({
+              matchId: result.matchId,
+              bandName: role === "VENUE" ? card.name : (myProfile?.name ?? "Artist"),
+              venueName: role === "BAND" ? card.venue.name : (myProfile?.name ?? "Venue"),
+              date: card.date || new Date().toISOString(),
+              agreedPay: card.budget || null,
+              setLength: card.setLength || null,
+              startTime: card.startTime || null,
+              endTime: card.endTime || null,
+              bandEmail: role === "VENUE" ? card.contactEmail : (myProfile?.contactEmail ?? ""),
+              venueEmail: role === "BAND" ? card.venue.bookingEmail : (myProfile?.bookingEmail ?? ""),
+              venueAddress: role === "BAND" ? card.venue.address : (myProfile?.address ?? ""),
+              generatedAt: new Date().toISOString()
+            });
+          }
+        }
+        // Remove card from UI stack since it's processed
+        setCards(prev => prev.filter(c => c.id !== card.id));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setProcessingId(null);
     }
   };
 
-  const handleRefill = async (): Promise<Card[]> => {
-    const result = await getDiscoveryFeed(radiusMiles, nextCursor ?? undefined);
-    if ("cards" in result) {
-      setNextCursor(result.nextCursor ?? null);
-      return result.cards;
+  const handleDismiss = async (card: any) => {
+    const slotId = role === "BAND" ? card.id : (card._activeSlotId ?? "");
+    const bandId = role === "VENUE" ? card.id : (myProfile?.id ?? "");
+
+    try {
+      await handleSwipe(slotId, bandId, "LEFT");
+      // Remove from list
+      setCards(prev => prev.filter(c => c.id !== card.id));
+    } catch (e) {
+      console.error(e);
     }
-    return [];
   };
 
-  const { currentCard, nextCard, swipeLeft, swipeRight, isSwiping, remaining } =
-    useCardDeck(initialCards, { onMatch: handleMatch, onRefillNeeded: handleRefill });
+  // ── Calculate Matchmaker Scores ─────────────────────────────────────────────
+  const scoredCards = cards.map((card) => {
+    if (!myProfile || !myProfile.latitude || !myProfile.longitude) {
+      return { card, score: { overallScore: 70, details: { distance: 0, genreMatch: "Pending", payMatch: "Pending", scheduleMatch: "Pending" } } };
+    }
 
-  const doLeft = () => {
-    if (!currentCard) return;
-    const slotId = currentCard.id ?? currentCard._activeSlotId;
-    const bandId = role === "BAND" ? undefined : currentCard.id;
-    // For BAND: slotId=card.id, bandId comes from session (server-side in action)
-    // For VENUE: bandId=card.id, slotId from card._activeSlotId
-    swipeLeft(
-      role === "BAND" ? currentCard.id : (currentCard._activeSlotId ?? ""),
-      role === "VENUE" ? currentCard.id : ""
+    const bandLat = role === "BAND" ? myProfile.latitude : (card.latitude ?? 0);
+    const bandLng = role === "BAND" ? myProfile.longitude : (card.longitude ?? 0);
+    const bandGenre = role === "BAND" ? myProfile.genre : (card.genre ?? "");
+
+    const venueLat = role === "BAND" ? (card.venue.latitude ?? 0) : myProfile.latitude;
+    const venueLng = role === "BAND" ? (card.venue.longitude ?? 0) : myProfile.longitude;
+    const venueGenres = role === "BAND" ? (card.venue.genres ?? "") : (myProfile.genres ?? "");
+    const venuePay = role === "BAND" ? (card.venue.averagePay ?? "") : (myProfile.averagePay ?? "");
+    const venueOpenDates = role === "BAND" ? (card.venue.openDates ?? "") : (myProfile.openDates ?? "");
+
+    const targetDates = role === "BAND"
+      ? (myProfile.targetDates ? JSON.parse(myProfile.targetDates) : [])
+      : [];
+
+    const score = calculateMatch(
+      { latitude: bandLat, longitude: bandLng, genre: bandGenre },
+      { latitude: venueLat, longitude: venueLng, genres: venueGenres, averagePay: venuePay, openDates: venueOpenDates },
+      targetDates,
+      radius,
+      minPay
     );
-  };
 
-  const doRight = () => {
-    if (!currentCard) return;
-    swipeRight(
-      role === "BAND" ? currentCard.id : (currentCard._activeSlotId ?? ""),
-      role === "VENUE" ? currentCard.id : ""
+    return { card, score };
+  });
+
+  // Filter scored list
+  const filteredCards = scoredCards
+    .filter((item) => {
+      // Radius limit filter
+      if (item.score.details.distance > radius) return false;
+
+      // Min pay filter
+      if (minPay > 0) {
+        let numericPay = 0;
+        const payStr = role === "BAND"
+          ? (item.card.budget ? String(item.card.budget) : item.card.venue.averagePay)
+          : (myProfile?.averagePay || "0");
+
+        if (payStr) {
+          const parsed = parseInt(payStr.replace(/[^0-9]/g, ""), 10);
+          if (!isNaN(parsed)) numericPay = parsed;
+        }
+        if (numericPay < minPay) return false;
+      }
+
+      // Genre filter
+      if (genreQuery) {
+        const query = genreQuery.toLowerCase();
+        const targetGenres = role === "BAND"
+          ? (item.card.venue.genres || "").toLowerCase()
+          : (item.card.genre || "").toLowerCase();
+        if (!targetGenres.includes(query)) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => b.score.overallScore - a.score.overallScore);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
+        <p className="text-zinc-500 text-xs font-black uppercase tracking-widest">Querying Match Database...</p>
+      </div>
     );
-  };
+  }
 
   return (
-    <>
+    <div className="space-y-8">
       {matchData && (
         <MatchOverlay contract={matchData} onClose={() => setMatchData(null)} />
       )}
 
-      <div className="flex flex-col items-center justify-center h-full select-none">
-        {/* Card count */}
-        <div className="mb-4 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-[#c5a059]" />
-          <span className="text-zinc-400 text-sm font-medium">
-            {remaining > 0 ? `${remaining} targets in queue` : "Queue empty"}
-          </span>
+      {/* Control Panel Filters */}
+      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-6">
+        <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+          <SlidersHorizontal className="w-4 h-4 text-[#c5a059]" />
+          <h2 className="text-xs font-black uppercase tracking-widest text-zinc-300">
+            Routing & Booking Filters
+          </h2>
         </div>
 
-        {/* Card stack */}
-        <div className="relative w-full max-w-sm h-[520px] mx-auto">
-          {!currentCard ? (
-            <EmptyState role={role} />
-          ) : (
-            <>
-              {nextCard &&
-                (role === "BAND" ? (
-                  <SlotCard card={nextCard} isNext />
-                ) : (
-                  <BandCard card={nextCard} isNext />
-                ))}
-              {role === "BAND" ? (
-                <SlotCard card={currentCard} />
-              ) : (
-                <BandCard card={currentCard} />
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        {currentCard && (
-          <div className="flex items-center gap-6 mt-8">
-            {/* Pass */}
-            <button
-              onClick={doLeft}
-              disabled={isSwiping}
-              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-zinc-900/30 active:scale-90 disabled:opacity-50"
-            >
-              <X className="w-7 h-7 text-zinc-400 hover:text-white" />
-            </button>
-
-            {/* Like */}
-            <button
-              onClick={doRight}
-              disabled={isSwiping}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-[#c5a059] to-[#a88242] hover:brightness-110 flex items-center justify-center transition-all duration-200 shadow-[0_0_30px_rgba(197,160,89,0.3)] hover:shadow-[0_0_50px_rgba(197,160,89,0.5)] active:scale-90 disabled:opacity-50"
-            >
-              <Check className="w-9 h-9 text-black stroke-[3px]" />
-            </button>
-
-            {/* Skip (same as pass but labeled) */}
-            <button
-              onClick={doLeft}
-              disabled={isSwiping}
-              className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 hover:border-[#c5a059] hover:bg-[#c5a059]/10 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-zinc-900/30 active:scale-90 disabled:opacity-50"
-            >
-              <Music2 className="w-6 h-6 text-zinc-400 hover:text-[#c5a059]" />
-            </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Radius Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500">
+              <span>Search Radius</span>
+              <span className="text-[#c5a059]">{radius} Miles</span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="500"
+              step="10"
+              className="w-full h-1 bg-zinc-855 rounded-lg appearance-none cursor-pointer accent-[#c5a059]"
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+            />
           </div>
-        )}
 
-        {/* Hint text */}
-        {currentCard && (
-          <p className="text-zinc-600 text-xs mt-4 text-center">
-            ← Skip Slot &nbsp;|&nbsp; Request Booking →
-          </p>
-        )}
+          {/* Min Compensation */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500">
+              <span>Minimum Payout</span>
+              <span className="text-emerald-400">${minPay}+</span>
+            </div>
+            <input
+              type="number"
+              placeholder="e.g. 200"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#c5a059]/40 placeholder-zinc-700"
+              value={minPay || ""}
+              onChange={(e) => setMinPay(Number(e.target.value))}
+            />
+          </div>
+
+          {/* Genre Search */}
+          <div className="space-y-2">
+            <div className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
+              Filter by Genre
+            </div>
+            <input
+              type="text"
+              placeholder="e.g. Rock, Blues, Electro"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#c5a059]/40 placeholder-zinc-700"
+              value={genreQuery}
+              onChange={(e) => setGenreQuery(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
-    </>
+
+      {/* Target Queue Count */}
+      <div className="flex items-center justify-between text-xs text-zinc-500 uppercase tracking-widest font-black">
+        <span>Qualified Matches</span>
+        <span className="text-[#c5a059] bg-[#c5a059]/5 px-3 py-1 rounded-full border border-[#c5a059]/20 flex items-center gap-1.5">
+          <Star size={11} className="animate-spin text-[#c5a059]" />
+          {filteredCards.length} Matches Found
+        </span>
+      </div>
+
+      {/* Matching Queue List */}
+      {filteredCards.length === 0 ? (
+        <div className="bg-zinc-900/30 border border-dashed border-zinc-800/80 rounded-3xl p-12 text-center">
+          <div className="text-5xl mb-4">🗺️</div>
+          <h3 className="text-lg font-black text-white uppercase tracking-tight mb-1">Queue Evaluated</h3>
+          <p className="text-zinc-500 text-xs max-w-sm mx-auto">
+            Adjust search radius, pay expectations, or style preferences to discover additional venues/artists.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredCards.map(({ card, score }) => {
+            const isExpanded = expandedId === card.id;
+            const dateStr = card.date
+              ? new Date(card.date).toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric"
+                })
+              : null;
+
+            return (
+              <div
+                key={card.id}
+                className="bg-zinc-900/60 border border-zinc-800/60 hover:border-[#c5a059]/20 rounded-2xl overflow-hidden transition-all duration-300 group"
+              >
+                {/* Main Card Summary */}
+                <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-5 relative">
+                  {/* Left Identity details */}
+                  <div className="flex items-start gap-4">
+                    {/* Match Score Badge */}
+                    <div className="w-14 h-14 rounded-2xl bg-zinc-950 border border-zinc-850 flex flex-col items-center justify-center flex-shrink-0 group-hover:border-[#c5a059]/40 transition-colors">
+                      <span className="text-[#c5a059] font-black text-sm">{score.overallScore}%</span>
+                      <span className="text-[7px] text-zinc-500 uppercase tracking-widest font-black">MATCH</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h3 className="font-black text-white text-base uppercase tracking-tight">
+                          {role === "BAND" ? card.venue.name : card.name}
+                        </h3>
+                        <span className="px-2.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-850 text-[9px] font-black uppercase text-zinc-400 tracking-wider">
+                          {role === "BAND" ? card.venue.venueType : (card.genre || "Artist")}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs text-zinc-500 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <MapPin size={12} className="text-[#c5a059]" />
+                          {role === "BAND" ? card.venue.address : (card.location || "Unknown")} ({score.details.distance} miles)
+                        </span>
+                        {dateStr && (
+                          <span className="flex items-center gap-1 font-bold text-zinc-400 bg-zinc-950 px-2 py-0.5 rounded-md border border-zinc-850">
+                            <Calendar size={12} className="text-[#c5a059]" />
+                            {dateStr}
+                          </span>
+                        )}
+                        {card.budget && (
+                          <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                            <DollarSign size={12} />
+                            ${card.budget.toLocaleString()} Guaranteed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Actions */}
+                  <div className="flex items-center gap-3 self-end md:self-center">
+                    {/* Expand Details Trigger */}
+                    <button
+                      onClick={() => setExpandedId(isExpanded ? null : card.id)}
+                      className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-855 text-zinc-400 hover:text-white transition-colors text-xs font-black uppercase tracking-wider flex items-center gap-1.5"
+                    >
+                      SPECS {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {/* Dismiss */}
+                    <button
+                      onClick={() => handleDismiss(card)}
+                      className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-855 hover:border-red-900 hover:bg-red-950/20 text-zinc-500 hover:text-red-400 flex items-center justify-center transition-colors"
+                      title="Dismiss Slot"
+                    >
+                      <X size={16} />
+                    </button>
+
+                    {/* Book */}
+                    <button
+                      onClick={() => handleRequestBooking(card)}
+                      disabled={processingId === card.id}
+                      className="px-5 py-2.5 rounded-xl bg-[#c5a059] hover:bg-[#d4b06a] disabled:opacity-40 text-zinc-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(197,160,89,0.15)] active:scale-97"
+                    >
+                      {processingId === card.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Check size={14} className="stroke-[3]" />
+                      )}
+                      REQUEST BOOKING
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded Details Breakdown */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 border-t border-zinc-800/50 bg-zinc-950/30 space-y-4 pt-4 animate-in fade-in duration-200">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {/* Metric 1: Location */}
+                      <div className="bg-zinc-950 border border-zinc-850 p-3.5 rounded-xl">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Location Match</div>
+                        <div className="text-xs font-black text-white mt-1 uppercase">
+                          {score.locationScore}% ({score.details.distance} mi)
+                        </div>
+                      </div>
+
+                      {/* Metric 2: Genre */}
+                      <div className="bg-zinc-950 border border-zinc-850 p-3.5 rounded-xl">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Genre Match</div>
+                        <div className="text-xs font-black text-white mt-1 uppercase">
+                          {score.details.genreMatch} ({score.genreScore}%)
+                        </div>
+                      </div>
+
+                      {/* Metric 3: Pay */}
+                      <div className="bg-zinc-950 border border-zinc-850 p-3.5 rounded-xl">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Pay Match</div>
+                        <div className="text-xs font-black text-emerald-400 mt-1 uppercase">
+                          {score.details.payMatch}
+                        </div>
+                      </div>
+
+                      {/* Metric 4: Schedule */}
+                      <div className="bg-zinc-950 border border-zinc-850 p-3.5 rounded-xl">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Schedule Fit</div>
+                        <div className="text-xs font-black text-white mt-1 uppercase">
+                          {score.details.scheduleMatch}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Notes or Info */}
+                    {role === "BAND" && card.notes && (
+                      <div className="p-3 bg-zinc-950 border border-zinc-850 rounded-xl text-xs text-zinc-400">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Venue Notes</div>
+                        <p>{card.notes}</p>
+                      </div>
+                    )}
+
+                    {role === "VENUE" && card.bio && (
+                      <div className="p-3 bg-zinc-950 border border-zinc-850 rounded-xl text-xs text-zinc-400">
+                        <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Artist Biography</div>
+                        <p>{card.bio}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
