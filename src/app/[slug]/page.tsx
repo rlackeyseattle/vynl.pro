@@ -8,6 +8,7 @@ export default async function CleanProfilePage({ params }: { params: Promise<{ s
   // 1. Check BandProfile by slug
   const band = await prisma.bandProfile.findUnique({
     where: { slug },
+    include: { user: { select: { name: true, bio: true } } }
   });
 
   if (band) {
@@ -24,7 +25,10 @@ export default async function CleanProfilePage({ params }: { params: Promise<{ s
   }
 
   // 3. Fallback: Check if it's a direct ID for backwards compatibility
-  const bandById = await prisma.bandProfile.findUnique({ where: { id: slug } });
+  const bandById = await prisma.bandProfile.findUnique({
+    where: { id: slug },
+    include: { user: { select: { name: true, bio: true } } }
+  });
   if (bandById) {
     return <ProfileClient type="BAND" data={bandById} />;
   }

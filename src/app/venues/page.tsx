@@ -52,6 +52,19 @@ const BORDER_COLOR = '#d5cfbe';
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
+const STATE_NAMES: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
+  MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+  OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+  VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+};
+
 // Map GPS coordinates of venues onto the 800x480 SVG map coordinates with index jittering fallback
 const getProjectedCoords = (venue: any, index: number) => {
   let x = 400;
@@ -619,238 +632,178 @@ export default function VenuesPage() {
         </div>
       </section>
 
-      {/* Main Grid content */}
-      <section className="container mx-auto px-6 py-12">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2.5rem' }} className="directory-grid-layout">
-          
-          {/* ——— Left Column: Sketched US Map and Router ——— */}
-          <div className="sketchbook-panel flex flex-col gap-6">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <MapPin size={18} color={P} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.85rem', fontWeight: 'bold', color: CHARCOAL, letterSpacing: '0.08em' }}>ACTIVE TOUR ROUTING ENGINE</span>
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                {selectedVenueIds.size > 0 && (
-                  <button 
-                    onClick={() => setSelectedVenueIds(new Set())}
-                    style={{ background: 'none', border: 'none', color: PK, fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                  >
-                    <Trash2 size={10} /> CLEAR SELECTIONS
-                  </button>
-                )}
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: C, fontWeight: 800 }}>{selectedVenueIds.size} VENUES SELECTED</span>
-              </div>
-            </div>
-
-            {/* Real Interactive Map panel */}
-            <div style={{ border: `1.5px solid ${OR}`, borderRadius: '12px', width: '100%', height: '420px', position: 'relative', overflow: 'hidden' }}>
-              <TouringMap 
-                venues={venues} 
-                routeNodes={selectedVenuesInOrder} 
-                onSelectVenue={(v) => toggleSelection(v.id)} 
-                isProduction={true} 
-              />
-            </div>
-
-            {/* Custom Route Stats Sheet */}
-            {selectedVenueIds.size > 0 && (
-              <div style={{ padding: '1.2rem', borderRadius: '8px', background: 'rgba(197,160,89,0.06)', border: `1.5px solid ${OR}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.75rem', fontWeight: 900, color: P }}>◈ ACTIVE ROUTING SHEET</span>
-                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: G, fontWeight: 800 }}>ROUTING COHERENT</span>
-                </div>
-
-                {/* Horizontal route draft */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '6px', marginBottom: '1rem' }}>
-                  {selectedVenuesInOrder.map((v, i) => (
-                    <div 
-                      key={v.id} 
-                      style={{ 
-                        flexShrink: 0, 
-                        padding: '6px 12px', 
-                        borderRadius: '4px', 
-                        background: '#faf9f5', 
-                        border: `1.5px solid ${v.venueType?.toUpperCase() === 'COOPERATIVE' ? C : BORDER_COLOR}`,
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '6px' 
-                      }}
-                    >
-                      <span style={{ fontFamily: 'Share Tech Mono', fontSize: '0.6rem', color: '#888' }}>#{i+1}</span>
-                      <strong style={{ fontSize: '0.75rem', color: CHARCOAL }}>{v.name}</strong>
-                      <span style={{ fontSize: '0.62rem', color: '#555', fontFamily: 'Share Tech Mono' }}>{v.address?.split(',').slice(-2)[0]?.trim() || v.city}</span>
-                      <button 
-                        onClick={() => toggleSelection(v.id)}
-                        style={{ border: 'none', background: 'none', color: PK, cursor: 'pointer', fontSize: '0.65rem', padding: 0 }}
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Combined specifications */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                  <div style={{ padding: '0.6rem', background: '#faf9f5', borderRadius: '4px', border: `1px solid ${BORDER_COLOR}` }}>
-                    <span style={{ display: 'block', fontSize: '0.5rem', fontFamily: 'Share Tech Mono, monospace', color: '#555' }}>ROUTE LENGTH</span>
-                    <span style={{ fontSize: '1.1rem', fontFamily: 'Outfit', fontWeight: 900, color: C }}>
-                      {selectedVenueIds.size} Outposts
-                    </span>
-                  </div>
-                  <div style={{ padding: '0.6rem', background: '#faf9f5', borderRadius: '4px', border: `1px solid ${BORDER_COLOR}` }}>
-                    <span style={{ display: 'block', fontSize: '0.5rem', fontFamily: 'Share Tech Mono, monospace', color: '#555' }}>AVERAGE ROUTE PAY</span>
-                    <span style={{ fontSize: '1.1rem', fontFamily: 'Outfit', fontWeight: 900, color: P }}>
-                      $1,450 / Gig
-                    </span>
-                  </div>
-                  <div style={{ padding: '0.6rem', background: '#faf9f5', borderRadius: '4px', border: `1px solid ${BORDER_COLOR}` }}>
-                    <span style={{ display: 'block', fontSize: '0.5rem', fontFamily: 'Share Tech Mono, monospace', color: '#555' }}>COOPERATIVE RATIO</span>
-                    <span style={{ fontSize: '1.1rem', fontFamily: 'Outfit', fontWeight: 900, color: OR }}>
-                      {Math.round((selectedVenuesInOrder.filter(v => v.venueType?.toUpperCase() === 'COOPERATIVE' || !v.averagePay?.includes("%")).length / selectedVenueIds.size) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+      {/* Main Directory content */}
+      <section className="container mx-auto px-6 py-12 max-w-6xl">
+        {loading ? (
+          <div className="flex items-center justify-center py-32">
+            <Loader2 className="w-10 h-10 text-[#c5a059] animate-spin" />
           </div>
+        ) : venues.length === 0 ? (
+          <div className="text-center py-24 text-zinc-500 border border-dashed border-[#d5cfbe] rounded-2xl">
+            <Mic2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p className="font-bold text-sm">No active outposts found matching your filter criteria.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-10">
+            {/* Group venues by state */}
+            {(() => {
+              const getVenueState = (v: any) => {
+                if (!v.address) return "OTHER";
+                const match = v.address.match(/,\s*([A-Z]{2})\b/i);
+                return match ? match[1].toUpperCase() : "OTHER";
+              };
 
-          {/* ——— Right Column: Search Results & Detailed Cards List ——— */}
-          <div className="flex flex-col gap-6">
-            <div className="sketchbook-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', padding: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.8rem', fontWeight: 'bold', color: CHARCOAL, letterSpacing: '0.08em' }}>GIG MATCHMAKER LIST</span>
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', color: C, fontWeight: 800 }}>{venues.length} MATCHES</span>
-              </div>
+              const grouped: Record<string, any[]> = {};
+              venues.forEach(v => {
+                const s = getVenueState(v);
+                if (!grouped[s]) grouped[s] = [];
+                grouped[s].push(v);
+              });
 
-              {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-[#c5a059] animate-spin" />
-                </div>
-              ) : venues.length === 0 ? (
-                <div className="text-center py-20 text-zinc-500 border border-dashed border-[#d5cfbe] rounded-xl">
-                  <Mic2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="font-bold text-xs">No active outposts found.</p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '430px', overflowY: 'auto', paddingRight: '4px' }} className="custom-scroll">
-                  {venues.map((venue, idx) => {
-                    const isSelected = selectedVenueIds.has(venue.id);
-                    const isCooperative = venue.venueType?.toUpperCase() === 'COOPERATIVE' || !venue.averagePay?.includes("%");
+              // Sort states alphabetically, putting "OTHER" at the end if it exists
+              const sortedStates = Object.keys(grouped).sort((a, b) => {
+                if (a === "OTHER") return 1;
+                if (b === "OTHER") return -1;
+                const nameA = STATE_NAMES[a] || a;
+                const nameB = STATE_NAMES[b] || b;
+                return nameA.localeCompare(nameB);
+              });
 
-                    return (
-                      <div 
-                        key={venue.id} 
-                        style={{
-                          borderLeft: `4px solid ${isCooperative ? C : P}`,
-                          borderColor: isSelected ? OR : (isCooperative ? C : P),
-                          background: isSelected ? 'rgba(197,160,89,0.04)' : 'rgba(44,44,40,0.015)'
-                        }}
-                        className={`p-5 rounded-lg border border-[#d5cfbe] transition-all duration-200 flex flex-col justify-between`}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-                          <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '50%',
-                              background: isSelected ? C : 'transparent',
-                              border: `1.5px solid ${isSelected ? C : '#999'}`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: isSelected ? '#faf9f5' : '#777',
-                              fontWeight: 700,
-                              fontSize: '0.65rem',
-                              transition: 'all 0.15s',
-                              flexShrink: 0
-                            }}>
-                              {isSelected ? <Check size={10} /> : <Plus size={10} />}
-                            </div>
+              return sortedStates.map(stateCode => {
+                const stateVenues = grouped[stateCode];
+                const stateName = STATE_NAMES[stateCode] || stateCode;
+
+                return (
+                  <div key={stateCode} className="flex flex-col gap-6">
+                    <div className="border-b border-[#d5cfbe]/60 pb-2 flex items-center justify-between">
+                      <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: '1.25rem', color: CHARCOAL }} className="flex items-center gap-2">
+                        <span>{stateName.toUpperCase()}</span>
+                        <span style={{ fontSize: '0.62rem', background: 'rgba(197,160,89,0.12)', border: `1px solid ${OR}`, padding: '2px 8px', borderRadius: '4px', color: OR, fontFamily: 'Share Tech Mono' }}>
+                          {stateVenues.length} {stateVenues.length === 1 ? 'OUTPOST' : 'OUTPOSTS'}
+                        </span>
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {stateVenues.map(venue => {
+                        const isSelected = selectedVenueIds.has(venue.id);
+                        const isCooperative = venue.venueType?.toUpperCase() === 'COOPERATIVE' || !venue.averagePay?.includes("%");
+
+                        return (
+                          <div 
+                            key={venue.id} 
+                            style={{
+                              borderLeft: `4px solid ${isCooperative ? C : P}`,
+                              borderColor: isSelected ? OR : (isCooperative ? C : P),
+                              background: isSelected ? 'rgba(197,160,89,0.04)' : 'rgba(44,44,40,0.015)'
+                            }}
+                            className={`p-5 rounded-lg border border-[#d5cfbe] transition-all duration-200 flex flex-col justify-between`}
+                          >
                             <div>
-                              <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
-                                {venue.name}
-                              </h4>
-                              <span style={{ fontSize: '0.68rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
-                                📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
-                              </span>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+                                <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <div style={{
+                                    width: '18px',
+                                    height: '18px',
+                                    borderRadius: '50%',
+                                    background: isSelected ? C : 'transparent',
+                                    border: `1.5px solid ${isSelected ? C : '#999'}`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: isSelected ? '#faf9f5' : '#777',
+                                    fontWeight: 700,
+                                    fontSize: '0.65rem',
+                                    transition: 'all 0.15s',
+                                    flexShrink: 0
+                                  }}>
+                                    {isSelected ? <Check size={10} /> : <Plus size={10} />}
+                                  </div>
+                                  <div>
+                                    <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
+                                      {venue.name}
+                                    </h4>
+                                    <span style={{ fontSize: '0.68rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
+                                      📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <span style={{
+                                  fontFamily: 'Share Tech Mono, monospace', fontSize: '0.52rem',
+                                  color: isCooperative ? C : P,
+                                  background: isCooperative ? 'rgba(95,138,107,0.08)' : 'rgba(178,83,41,0.08)',
+                                  border: `1.5px solid ${isCooperative ? C : P}`,
+                                  padding: '2px 8px', borderRadius: '4px', fontWeight: 800
+                                }}>
+                                  {isCooperative ? "COOP OUTPOST" : "TRADITIONAL"}
+                                </span>
+                              </div>
+
+                              {venue.bookingHistory && (
+                                <p style={{ fontSize: '0.72rem', color: '#555', lineHeight: 1.4, marginBottom: '0.8rem' }}>{venue.bookingHistory}</p>
+                              )}
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.7rem', color: '#555', marginBottom: '1rem', borderTop: '1px solid rgba(44,44,40,0.05)', paddingTop: '0.5rem' }}>
+                                {venue.phone && <div><strong>Phone:</strong> {venue.phone}</div>}
+                                {venue.bookingEmail && <div><strong>Email:</strong> {venue.bookingEmail}</div>}
+                                {venue.averagePay && <div><strong>Avg Pay:</strong> <span style={{ color: G, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
+                                {venue.ageRequirement && <div><strong>Age:</strong> {venue.ageRequirement}</div>}
+                              </div>
+                            </div>
+
+                            {/* Card actions */}
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <button
+                                onClick={() => toggleSelection(venue.id)}
+                                style={{ 
+                                  flex: 1, 
+                                  fontSize: '0.65rem', 
+                                  borderColor: isSelected ? C : BORDER_COLOR,
+                                  color: isSelected ? C : '#555',
+                                  background: isSelected ? 'rgba(95,138,107,0.04)' : 'rgba(44,44,40,0.015)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '4px'
+                                }}
+                                className="filter-btn"
+                              >
+                                {isSelected ? <><Check size={10} /> IN BOOKING LIST</> : <><Plus size={10} /> ADD TO BOOKING LIST</>}
+                              </button>
+                              
+                              <button
+                                onClick={() => setBookingVenue(venue)}
+                                style={{
+                                  flex: 1.2,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '0.3rem',
+                                  padding: '0.55rem 0.8rem',
+                                  borderRadius: '4px',
+                                  background: CHARCOAL,
+                                  border: `1.5px solid ${CHARCOAL}`,
+                                  color: '#faf9f5',
+                                  fontWeight: 700,
+                                  fontSize: '0.68rem',
+                                  fontFamily: 'Share Tech Mono, monospace',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                NEGOTIATE GIG <Sparkles size={11} fill="#faf9f5" />
+                              </button>
                             </div>
                           </div>
-
-                          <span style={{
-                            fontFamily: 'Share Tech Mono, monospace', fontSize: '0.52rem',
-                            color: isCooperative ? C : P,
-                            background: isCooperative ? 'rgba(95,138,107,0.08)' : 'rgba(178,83,41,0.08)',
-                            border: `1.5px solid ${isCooperative ? C : P}`,
-                            padding: '2px 8px', borderRadius: '4px', fontWeight: 800
-                          }}>
-                            {isCooperative ? "COOP OUTPOST" : "TRADITIONAL"}
-                          </span>
-                        </div>
-
-                        {venue.bookingHistory && (
-                          <p style={{ fontSize: '0.72rem', color: '#555', lineHeight: 1.4, marginBottom: '0.8rem' }}>{venue.bookingHistory}</p>
-                        )}
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.7rem', color: '#555', marginBottom: '1rem', borderTop: '1px solid rgba(44,44,40,0.05)', paddingTop: '0.5rem' }}>
-                          {venue.phone && <div><strong>Phone:</strong> {venue.phone}</div>}
-                          {venue.bookingEmail && <div><strong>Email:</strong> {venue.bookingEmail}</div>}
-                          {venue.averagePay && <div><strong>Avg Pay:</strong> <span style={{ color: G, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
-                          {venue.ageRequirement && <div><strong>Age:</strong> {venue.ageRequirement}</div>}
-                        </div>
-
-                        {/* Card actions */}
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                          <button
-                            onClick={() => toggleSelection(venue.id)}
-                            style={{ 
-                              flex: 1, 
-                              fontSize: '0.65rem', 
-                              borderColor: isSelected ? C : BORDER_COLOR,
-                              color: isSelected ? C : '#555',
-                              background: isSelected ? 'rgba(95,138,107,0.04)' : '#faf9f5',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '4px'
-                            }}
-                            className="filter-btn"
-                          >
-                            {isSelected ? <><Check size={10} /> IN BOOKING LIST</> : <><Plus size={10} /> ADD TO BOOKING LIST</>}
-                          </button>
-                          
-                          <button
-                            onClick={() => setBookingVenue(venue)}
-                            style={{
-                              flex: 1.2,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.3rem',
-                              padding: '0.55rem 0.8rem',
-                              borderRadius: '4px',
-                              background: CHARCOAL,
-                              border: `1.5px solid ${CHARCOAL}`,
-                              color: '#faf9f5',
-                              fontWeight: 700,
-                              fontSize: '0.68rem',
-                              fontFamily: 'Share Tech Mono, monospace',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            NEGOTIATE GIG <Sparkles size={11} fill="#faf9f5" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
-
-        </div>
+        )}
       </section>
 
       {/* Floating Action Bar for Bulk Booking (Vynl campaign launch synced) */}

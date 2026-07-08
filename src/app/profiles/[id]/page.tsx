@@ -16,7 +16,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
 
   if (!user) {
     // Check if it's a direct profile ID instead of a user ID
-    const band = await prisma.bandProfile.findUnique({ where: { id } });
+    const band = await prisma.bandProfile.findUnique({
+      where: { id },
+      include: { user: { select: { name: true, bio: true } } }
+    });
     const venue = await prisma.venueProfile.findUnique({ where: { id } });
     
     if (band) {
@@ -30,7 +33,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   }
 
   if (user.role === "BAND" && user.bandProfile) {
-    return <ProfileClient type="BAND" data={user.bandProfile} />;
+    const bandProfileWithUser = {
+      ...user.bandProfile,
+      user: { name: user.name, bio: user.bio }
+    };
+    return <ProfileClient type="BAND" data={bandProfileWithUser} />;
   }
 
   if (user.role === "VENUE" && user.venueProfile) {

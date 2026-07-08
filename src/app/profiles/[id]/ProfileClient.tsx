@@ -93,8 +93,8 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
     }
   };
 
-  const name = data.name || "UNNAMED PROFILE";
-  const bio = data.bio || data.bookingHistory || "No artist statement available yet.";
+  const name = isBand ? (data.user?.name || data.name || "UNNAMED ARTIST") : (data.name || "UNNAMED VENUE");
+  const bio = data.bio || data.user?.bio || data.bookingHistory || "No artist statement available yet.";
   const location = data.location || data.address || "Unknown Location";
 
   const headerBgImage = isBand
