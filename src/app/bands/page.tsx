@@ -99,7 +99,7 @@ export default function BandsPage() {
             <div className="space-y-4">
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 1.1rem', borderRadius: '100px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}` }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ec4899' }} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: OR, fontWeight: 700 }}>◈ VYNL.PRO // ARTIST ROSTER</span>
+                <span style={{ fontSize: '0.68rem', letterSpacing: '0.12em', color: OR, fontWeight: 700 }}>◈ VYNL.PRO // ARTIST ROSTER</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
                 The Artist Grid
@@ -222,7 +222,7 @@ export default function BandsPage() {
                     <div className="border-b border-zinc-800/80 pb-2 flex items-center justify-between">
                       <h3 className="font-black text-white text-lg tracking-tighter uppercase font-sans flex items-center gap-2">
                         <span>{stateName.toUpperCase()}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(197,160,89,0.12)', border: `1px solid ${OR}`, padding: '2px 8px', borderRadius: '4px', color: OR, fontFamily: 'Share Tech Mono' }}>
+                        <span style={{ fontSize: '0.62rem', background: 'rgba(197,160,89,0.12)', border: `1px solid ${OR}`, padding: '2px 8px', borderRadius: '4px', color: OR }}>
                           {stateBands.length} {stateBands.length === 1 ? 'ARTIST' : 'ARTISTS'}
                         </span>
                       </h3>
@@ -273,7 +273,7 @@ export default function BandsPage() {
                                 </div>
 
                                 <span style={{
-                                  fontFamily: 'Share Tech Mono, monospace', fontSize: '0.52rem',
+                                  fontSize: '0.52rem',
                                   color: band.coverOrOriginal === 'ORIGINAL' ? C : (band.coverOrOriginal === 'BOTH' ? OR : P),
                                   background: 'rgba(255,255,255,0.02)',
                                   border: `1.5px solid ${band.coverOrOriginal === 'ORIGINAL' ? C : (band.coverOrOriginal === 'BOTH' ? OR : P)}`,
@@ -337,7 +337,6 @@ export default function BandsPage() {
                                   color: '#09090b',
                                   fontWeight: 700,
                                   fontSize: '0.68rem',
-                                  fontFamily: 'Share Tech Mono, monospace',
                                   cursor: 'pointer'
                                 }}
                               >

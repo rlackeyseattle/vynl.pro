@@ -36,7 +36,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 shadow-[0_0_15px_rgba(197,160,89,0.05)]">
             <Sparkles className="w-3.5 h-3.5 text-[#c5a059]" />
-            <span style={{ fontFamily: 'Share Tech Mono, monospace' }} className="text-xs uppercase tracking-widest text-[#c5a059] font-bold">
+            <span className="text-xs uppercase tracking-widest text-[#c5a059] font-bold">
               VYNL.PRO // Live Performance Network
             </span>
           </div>
