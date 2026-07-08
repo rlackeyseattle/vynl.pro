@@ -36,7 +36,7 @@ jobs:
 
       - name: Setup Web Directory & Capacitor Sync (if Capacitor app)
         run: |
-          if [ -f "capacitor.config.json" ]; then
+          if [ -f "capacitor.config.json" ] || [ -f "capacitor.config.ts" ]; then
             mkdir -p out
             npm run build || true
             npx cap sync ios
