@@ -106,9 +106,42 @@ export async function updateProfile(formData: {
     }
 
     if (role === "BAND") {
-      await prisma.bandProfile.update({
+      await prisma.bandProfile.upsert({
         where: { userId },
-        data: {
+        create: {
+          userId,
+          genre: formData.genre || null,
+          profileImage: formData.profileImage || null,
+          headerImage: formData.headerImage || null,
+          backgroundImage: formData.backgroundImage || null,
+          design1Image: formData.design1Image || null,
+          design2Image: formData.design2Image || null,
+          latitude: coords?.latitude ?? null,
+          longitude: coords?.longitude ?? null,
+          bio: formData.bio || null,
+          minimumGuarantee: formData.minimumGuarantee !== undefined ? formData.minimumGuarantee : null,
+          expectedDraw: formData.expectedDraw !== undefined ? formData.expectedDraw : null,
+          isTouring: !!formData.isTouring,
+          isNational: !!formData.isNational,
+          isSigned: !!formData.isSigned,
+          hasRepresentation: !!formData.hasRepresentation,
+          representationDetails: formData.representationDetails || null,
+          contactEmail: formData.contactEmail || null,
+          contactPhone: formData.contactPhone || null,
+          coverOrOriginal: formData.coverOrOriginal || null,
+          bandRider: formData.bandRider || null,
+          providesPA: !!formData.providesPA,
+          hasSoundGuy: !!formData.hasSoundGuy,
+          handlesPresales: !!formData.handlesPresales,
+          spotifyUrl: formData.spotifyUrl || null,
+          appleMusicUrl: formData.appleMusicUrl || null,
+          tidalUrl: formData.tidalUrl || null,
+          youtubeUrl: formData.youtubeUrl || null,
+          bandcampUrl: formData.bandcampUrl || null,
+          soundcloudUrl: formData.soundcloudUrl || null,
+          slug: finalSlug || `artist-${Math.random().toString(36).slice(2, 8)}`,
+        },
+        update: {
           genre: formData.genre || null,
           profileImage: formData.profileImage || null,
           headerImage: formData.headerImage || null,
@@ -141,18 +174,34 @@ export async function updateProfile(formData: {
         }
       });
     } else if (role === "VENUE") {
-      // Find current VenueProfile to ensure we update the correct unique record
-      const currentVenue = await prisma.venueProfile.findUnique({
-        where: { userId }
-      });
-
-      if (!currentVenue) {
-        return { success: false, error: "Venue profile not found" };
-      }
-
-      await prisma.venueProfile.update({
-        where: { id: currentVenue.id },
-        data: {
+      await prisma.venueProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          name: formData.name || "New Venue",
+          address: formData.address || null,
+          phone: formData.phone || null,
+          bookingEmail: formData.bookingEmail || null,
+          contactName: formData.contactName || null,
+          website: formData.website || null,
+          venueType: formData.venueType || null,
+          ageRequirement: formData.ageRequirement || null,
+          averagePay: formData.averagePay || null,
+          payType: formData.payType || null,
+          openDates: formData.openDates || null,
+          interiorImage: formData.interiorImage || null,
+          exteriorImage: formData.exteriorImage || null,
+          stageImage: formData.stageImage || null,
+          bookingDays: formData.bookingDays || null,
+          eventFeedUrl: formData.eventFeedUrl || null,
+          targetBandsDescription: formData.targetBandsDescription || null,
+          targetBookingNights: formData.targetBookingNights || null,
+          latitude: coords?.latitude ?? null,
+          longitude: coords?.longitude ?? null,
+          genres: formData.genre || null,
+          slug: finalSlug || `venue-${Math.random().toString(36).slice(2, 8)}`,
+        },
+        update: {
           ...(formData.name ? { name: formData.name } : {}),
           address: formData.address || null,
           phone: formData.phone || null,
@@ -172,7 +221,7 @@ export async function updateProfile(formData: {
           targetBandsDescription: formData.targetBandsDescription || null,
           targetBookingNights: formData.targetBookingNights || null,
           ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
-          genres: formData.genre || null, // map genre input to genres field for compatibility
+          genres: formData.genre || null,
           ...(finalSlug ? { slug: finalSlug } : {}),
         }
       });

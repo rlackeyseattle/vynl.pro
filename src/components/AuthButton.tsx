@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signOut, signIn } from "next-auth/react";
+import Link from "next/link";
 import { LogOut, User as UserIcon, Zap } from "lucide-react";
 
 export function AuthButton() {
@@ -13,14 +14,18 @@ export function AuthButton() {
   if (session) {
     return (
       <div className="flex items-center space-x-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
+        <Link
+          href="/settings"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 hover:border-zinc-700/80 transition-all cursor-pointer"
+          title="Build / Edit Music Profile"
+        >
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-indigo-600 flex items-center justify-center text-[10px] font-black text-white">
             {(session.user?.name || session.user?.email || "U")[0].toUpperCase()}
           </div>
           <span className="text-xs font-medium text-zinc-300 max-w-[120px] truncate">
             {session.user?.name || session.user?.email}
           </span>
-        </div>
+        </Link>
         <button
           onClick={() => signOut()}
           className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all border border-zinc-700 text-xs"

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { Info, Map as MapIcon, Search, Zap, Loader2, Music, Building2, Users, Mic2, Guitar, Speaker, TrendingUp, Route, Navigation, Globe, Activity, Mail, User, MapPin, ChevronRight, ChevronLeft, X, Send, AlertTriangle, Radio, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 
@@ -39,6 +39,7 @@ function AnimatedCounter({ value, label, color, icon: Icon }: { value: number, l
 }
 
 export default function MapPage() {
+  const { data: session } = useSession();
   const [venues, setVenues] = useState([]);
   const [bands, setBands] = useState([]);
   const [resources, setResources] = useState([]);
@@ -310,16 +311,54 @@ export default function MapPage() {
           ) : (
             <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 flex-1 flex flex-col justify-between">
               <div className="space-y-6">
-                <div className="p-5 bg-pink-600/10 rounded-2xl border border-pink-500/20 text-[10px] text-pink-400 font-medium flex flex-col gap-3">
-                  <p className="flex items-center gap-2 font-black uppercase tracking-widest text-white"><Zap className="w-3 h-3 text-pink-500" /> Circuit Intelligence</p>
-                  <p className="text-zinc-400">Join the scene to connect with venues, book dates, and synchronize your tour schedule.</p>
-                  <button 
-                    onClick={() => signIn()}
-                    className="py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-black uppercase transition-all shadow-lg shadow-pink-600/20"
-                  >
-                    Join / Log In
-                  </button>
-                </div>
+                {!session ? (
+                  <div className="p-5 bg-pink-600/10 rounded-2xl border border-pink-500/20 text-[10px] text-pink-400 font-medium flex flex-col gap-3">
+                    <p className="flex items-center gap-2 font-black uppercase tracking-widest text-white"><Zap className="w-3 h-3 text-pink-500" /> Circuit Intelligence</p>
+                    <p className="text-zinc-400">Join the scene to connect with venues, book dates, and synchronize your tour schedule.</p>
+                    <button 
+                      onClick={() => signIn()}
+                      className="py-3 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-black uppercase transition-all shadow-lg shadow-pink-600/20"
+                    >
+                      Join / Log In
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-5 bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl flex flex-col gap-3 shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase text-cyan-400 tracking-wider flex items-center gap-1.5 mb-1">
+                        <Activity className="w-3.5 h-3.5" /> CIRCUIT CONTROL ROOM
+                      </h4>
+                      <p className="text-[9px] text-zinc-400 leading-normal">Active Session: <span className="font-bold text-zinc-300">{session.user?.name || session.user?.email}</span>. Manage your routing & gig matches below.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 mt-1 text-[10px] font-bold">
+                      <Link 
+                        href="/settings"
+                        className="flex items-center justify-between p-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 rounded-xl text-zinc-300 hover:text-white hover:border-cyan-500/30 transition-all"
+                      >
+                        <span>Build Music Profile</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+                      </Link>
+
+                      <Link 
+                        href="/venues"
+                        className="flex items-center justify-between p-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 rounded-xl text-zinc-300 hover:text-white hover:border-cyan-500/30 transition-all"
+                      >
+                        <span>Browse Venue Outposts</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-zinc-650" />
+                      </Link>
+
+                      <Link 
+                        href="/discover"
+                        className="flex items-center justify-between p-2.5 bg-gradient-to-r from-[#c5a059]/10 to-transparent hover:from-[#c5a059]/20 border border-[#c5a059]/20 rounded-xl text-[#c5a059] hover:text-[#f3d085] transition-all"
+                      >
+                        <span>View Direct Booking Matches</span>
+                        <Zap className="w-3.5 h-3.5 text-[#c5a059]" />
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Stats Stacked Vertically */}
                 {showCounter && (
