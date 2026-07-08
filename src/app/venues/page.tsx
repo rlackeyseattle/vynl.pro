@@ -705,6 +705,16 @@ export default function VenuesPage() {
                             className={`p-5 rounded-lg border border-zinc-85 transition-all duration-200 flex flex-col justify-between`}
                           >
                             <div>
+                              {/* Venue Image Banner */}
+                              {(venue.exteriorImage || venue.interiorImage) && (
+                                <div className="w-full h-36 rounded-md overflow-hidden mb-4 border border-zinc-800/60 relative">
+                                  <img 
+                                    src={venue.exteriorImage || venue.interiorImage} 
+                                    alt={venue.name} 
+                                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                  />
+                                </div>
+                              )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
                                 {isAuthenticated ? (
                                   <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

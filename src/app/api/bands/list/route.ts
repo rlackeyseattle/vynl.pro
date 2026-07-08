@@ -14,9 +14,11 @@ export async function GET(req: Request) {
         AND: [
           {
             user: {
-              NOT: {
-                email: { endsWith: "@vynl.pro" }
-              }
+              NOT: [
+                { email: { endsWith: "@vynl.pro" } },
+                { email: { endsWith: "@example.com" } },
+                { email: { equals: "tuba.dudes.music@gmail.com" } }
+              ]
             }
           },
           search ? {

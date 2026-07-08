@@ -14,6 +14,13 @@ export async function GET() {
       where: {
         latitude: { not: null },
         longitude: { not: null },
+        user: {
+          NOT: [
+            { email: { endsWith: "@vynl.pro" } },
+            { email: { endsWith: "@example.com" } },
+            { email: { equals: "tuba.dudes.music@gmail.com" } }
+          ]
+        }
       }
     });
 

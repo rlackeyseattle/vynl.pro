@@ -340,7 +340,16 @@ async function getVenueFeed(
       activeStatus: true,
       AND: [
         cursor ? { id: { gt: cursor } } : {},
-        { id: { notIn: swipedBandIds.length ? swipedBandIds : ["__none__"] } }
+        { id: { notIn: swipedBandIds.length ? swipedBandIds : ["__none__"] } },
+        {
+          user: {
+            NOT: [
+              { email: { endsWith: "@vynl.pro" } },
+              { email: { endsWith: "@example.com" } },
+              { email: { equals: "tuba.dudes.music@gmail.com" } }
+            ]
+          }
+        }
       ],
     },
     include: {
