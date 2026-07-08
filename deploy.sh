@@ -128,6 +128,30 @@ if [ ! -f "$apiKeyPath" ]; then
     apiKeyPath="$HOME/.config/antigravity/api_key.json"
 fi
 
+# Prefill App Store Connect Metadata
+if [ -f "$apiKeyPath" ]; then
+    echo -e "\033[0;33mPrefilling App Store Connect metadata...\033[0m"
+    bundleId=""
+    if [ -f "capacitor.config.json" ]; then
+        bundleId=$(node -e "console.log(require('./capacitor.config.json').appId)")
+    fi
+    if [ -f "app.json" ]; then
+        bundleId=$(node -e "const app = require('./app.json'); console.log(app.expo && app.expo.ios ? app.expo.ios.bundleIdentifier : '')")
+    fi
+    
+    if [ -n "$bundleId" ]; then
+        echo -e "\033[0;32mResolved Bundle ID: $bundleId\033[0m"
+        prefillerScript="$HOME/.config/antigravity/prep_appstore_listing.py"
+        if [ -f "$prefillerScript" ]; then
+            python "$prefillerScript" --bundle-id "$bundleId" --project-name "$projectName" --config-path "$apiKeyPath" || echo -e "\033[0;33mWarning: App Store metadata prefiller encountered an error.\033[0m"
+        else
+            echo -e "\033[0;33mApp Store metadata prefiller script not found at $prefillerScript\033[0m"
+        fi
+    else
+        echo -e "\033[0;33mCould not resolve Bundle ID. Skipping metadata prefill.\033[0m"
+    fi
+fi
+
 # Build/Sign/Upload Steps
 if command -v xcodebuild &> /dev/null; then
     echo -e "\033[0;33mXcode toolchain detected. Instantiating Xcode optimization builds...\033[0m"

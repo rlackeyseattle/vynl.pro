@@ -57,6 +57,7 @@ const BandcampIcon = () => (
 
 export default function ProfileClient({ type, data }: ProfileClientProps) {
   const { data: session } = useSession();
+  const isAuthenticated = !!session;
   const isBand = type === "BAND";
 
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -244,12 +245,21 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
 
             {/* Booking email */}
             {(data.bookingEmail || data.contactEmail) && (
-              <a
-                href={`mailto:${data.bookingEmail || data.contactEmail}`}
-                className="flex items-center gap-2 px-5 py-2.5 bg-zinc-950/60 backdrop-blur rounded-full border border-zinc-700/40 hover:border-[#c5a059]/50 hover:bg-[#c5a059]/10 font-bold text-xs text-zinc-300 hover:text-[#c5a059] transition-all"
-              >
-                <Mail size={12} /> {data.bookingEmail || data.contactEmail}
-              </a>
+              isAuthenticated ? (
+                <a
+                  href={`mailto:${data.bookingEmail || data.contactEmail}`}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-zinc-950/60 backdrop-blur rounded-full border border-zinc-700/40 hover:border-[#c5a059]/50 hover:bg-[#c5a059]/10 font-bold text-xs text-zinc-300 hover:text-[#c5a059] transition-all"
+                >
+                  <Mail size={12} /> {data.bookingEmail || data.contactEmail}
+                </a>
+              ) : (
+                <Link
+                  href="/auth/signup"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-zinc-950/60 backdrop-blur rounded-full border border-zinc-800 hover:border-[#c5a059]/50 hover:bg-[#c5a059]/5 font-bold text-xs text-zinc-500 hover:text-[#c5a059] transition-all"
+                >
+                  <Mail size={12} /> 🔒 Register to view email
+                </Link>
+              )
             )}
 
             {/* Website */}
@@ -432,8 +442,8 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
 
             {isBand ? (
               <div className="grid grid-cols-2 gap-3">
-                <StatCard label="Min Guarantee" value={data.minimumGuarantee ? `$${data.minimumGuarantee.toLocaleString()}` : "Open"} sub="Per show floor" gold />
-                <StatCard label="Expected Draw" value={data.expectedDraw ? `${data.expectedDraw}+` : "TBD"} sub="Avg crowd" />
+                <StatCard label="Min Guarantee" value={isAuthenticated ? (data.minimumGuarantee ? `$${data.minimumGuarantee.toLocaleString()}` : "Open") : "🔒 Locked"} sub="Per show floor" gold={isAuthenticated} />
+                <StatCard label="Expected Draw" value={isAuthenticated ? (data.expectedDraw ? `${data.expectedDraw}+` : "TBD") : "🔒 Locked"} sub="Avg crowd" />
                 <StatCard label="Tour Status" value={data.isTouring ? "ON TOUR" : "REGIONAL"} sub="Routing" />
                 <StatCard label="Reach" value={data.isNational ? "NATIONAL" : "REGIONAL"} sub="Geographic" />
                 <StatCard label="PA System" value={data.providesPA ? "ARTIST OWN" : "VENUE REQ'D"} sub="Equipment" />
@@ -441,32 +451,41 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
                 <StatCard label="Presales" value={data.handlesPresales ? "YES" : "NO"} sub="Ticket handling" />
                 <StatCard
                   label="Representation"
-                  value={data.hasRepresentation ? "MANAGED" : "DIRECT"}
-                  sub={data.representationDetails || "Booking contact"}
+                  value={isAuthenticated ? (data.hasRepresentation ? "MANAGED" : "DIRECT") : "🔒 Locked"}
+                  sub={isAuthenticated ? (data.representationDetails || "Booking contact") : "Members only"}
                 />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <StatCard label="Venue Type" value={data.venueType || "BAR"} sub="Atmosphere" />
                 <StatCard label="Capacity" value={data.capacity ? `${data.capacity}` : "TBD"} sub="Fire code limit" />
-                <StatCard label="Avg Payout" value={data.averagePay || "TBD"} sub="Per engagement" gold />
-                <StatCard label="Pay Model" value={data.payType || "GUARANTEE"} sub="Deal structure" />
+                <StatCard label="Avg Payout" value={isAuthenticated ? (data.averagePay || "TBD") : "🔒 Locked"} sub="Per engagement" gold={isAuthenticated} />
+                <StatCard label="Pay Model" value={isAuthenticated ? (data.payType || "GUARANTEE") : "🔒 Locked"} sub="Deal structure" />
                 <StatCard label="Age Policy" value={data.ageRequirement || "21+"} sub="Door requirement" />
                 <StatCard label="Booking Days" value={data.bookingDays || "Contact"} sub="Active nights" />
                 {data.capacity && (
-                  <StatCard label="Draw Floor" value={data.defaultBudget ? `$${data.defaultBudget}` : "TBD"} sub="Default budget" />
+                  <StatCard label="Draw Floor" value={isAuthenticated ? (data.defaultBudget ? `$${data.defaultBudget}` : "TBD") : "🔒 Locked"} sub="Default budget" />
                 )}
                 <StatCard label="Claim Status" value={data.claimed ? "CLAIMED ✓" : "UNCLAIMED"} sub="Venue verified" />
               </div>
             )}
 
             {/* CTA Button */}
-            <button
-              onClick={() => setShowBookingModal(true)}
-              className="w-full mt-2 py-4 bg-[#c5a059] hover:bg-[#d4b06a] active:scale-98 transition-all rounded-2xl font-black text-sm text-zinc-950 shadow-[0_0_30px_rgba(197,160,89,0.25)] hover:shadow-[0_0_40px_rgba(197,160,89,0.35)] uppercase tracking-wider"
-            >
-              {isBand ? "SUBMIT BOOKING PROPOSAL" : "ENQUIRE ABOUT SLOT"}
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="w-full mt-2 py-4 bg-[#c5a059] hover:bg-[#d4b06a] active:scale-98 transition-all rounded-2xl font-black text-sm text-zinc-950 shadow-[0_0_30px_rgba(197,160,89,0.25)] hover:shadow-[0_0_40px_rgba(197,160,89,0.35)] uppercase tracking-wider"
+              >
+                {isBand ? "SUBMIT BOOKING PROPOSAL" : "ENQUIRE ABOUT SLOT"}
+              </button>
+            ) : (
+              <Link
+                href="/auth/signup"
+                className="w-full block text-center mt-2 py-4 bg-zinc-800 hover:bg-zinc-700 active:scale-98 transition-all rounded-2xl font-black text-sm text-white border border-zinc-750 uppercase tracking-wider"
+              >
+                🔒 REGISTER TO GIG MATCH
+              </Link>
+            )}
           </div>
 
           {/* Contact Block */}
@@ -474,36 +493,51 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
             <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2.5">
               <Send className="text-emerald-400 w-4 h-4" /> CONTACT DIRECTORY
             </h3>
-            <div className="space-y-3">
-              <DetailItem
-                label="Booking Contact"
-                value={data.contactName || (isBand ? "Artist Management" : "Venue Booking")}
-              />
-              {(data.contactEmail || data.bookingEmail) && (
+            {isAuthenticated ? (
+              <div className="space-y-3">
                 <DetailItem
-                  label="Email"
-                  value={data.contactEmail || data.bookingEmail}
-                  icon={<Mail className="w-4 h-4 text-emerald-400" />}
-                  href={`mailto:${data.contactEmail || data.bookingEmail}`}
+                  label="Booking Contact"
+                  value={data.contactName || (isBand ? "Artist Management" : "Venue Booking")}
                 />
-              )}
-              {(data.contactPhone || data.phone) && (
-                <DetailItem
-                  label="Phone"
-                  value={data.contactPhone || data.phone}
-                  icon={<Phone className="w-4 h-4 text-emerald-400" />}
-                  href={`tel:${data.contactPhone || data.phone}`}
-                />
-              )}
-              {data.website && (
-                <DetailItem
-                  label="Website"
-                  value={new URL(data.website).hostname}
-                  icon={<Globe className="w-4 h-4 text-[#c5a059]" />}
-                  href={data.website}
-                />
-              )}
-            </div>
+                {(data.contactEmail || data.bookingEmail) && (
+                  <DetailItem
+                    label="Email"
+                    value={data.contactEmail || data.bookingEmail}
+                    icon={<Mail className="w-4 h-4 text-emerald-400" />}
+                    href={`mailto:${data.contactEmail || data.bookingEmail}`}
+                  />
+                )}
+                {(data.contactPhone || data.phone) && (
+                  <DetailItem
+                    label="Phone"
+                    value={data.contactPhone || data.phone}
+                    icon={<Phone className="w-4 h-4 text-emerald-400" />}
+                    href={`tel:${data.contactPhone || data.phone}`}
+                  />
+                )}
+                {data.website && (
+                  <DetailItem
+                    label="Website"
+                    value={new URL(data.website).hostname}
+                    icon={<Globe className="w-4 h-4 text-[#c5a059]" />}
+                    href={data.website}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-xs text-zinc-500 leading-relaxed font-mono">
+                  🔒 Staging and direct booking contact details are restricted to verified industry members.
+                </p>
+                <Link
+                  href="/auth/signup"
+                  style={{ background: '#faf9f5', color: '#09090b' }}
+                  className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs font-black uppercase tracking-wider"
+                >
+                  REGISTER TO VIEW CONTACTS
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Artist target dates — Band only */}

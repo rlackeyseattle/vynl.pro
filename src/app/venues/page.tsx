@@ -32,6 +32,7 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getCurrentProfile } from "@/app/actions/profile";
+import { useSession } from "next-auth/react";
 
 const TouringMap = dynamic(() => import("@/components/TouringMap"), { 
   ssr: false,
@@ -103,6 +104,8 @@ const getProjectedCoords = (venue: any, index: number) => {
 };
 
 export default function VenuesPage() {
+  const { data: session } = useSession();
+  const isAuthenticated = !!session;
   const [venues, setVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -703,33 +706,46 @@ export default function VenuesPage() {
                           >
                             <div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-                                <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <div style={{
-                                    width: '18px',
-                                    height: '18px',
-                                    borderRadius: '50%',
-                                    background: isSelected ? C : 'transparent',
-                                    border: `1.5px solid ${isSelected ? C : '#999'}`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: isSelected ? '#faf9f5' : '#777',
-                                    fontWeight: 700,
-                                    fontSize: '0.65rem',
-                                    transition: 'all 0.15s',
-                                    flexShrink: 0
-                                  }}>
-                                    {isSelected ? <Check size={10} /> : <Plus size={10} />}
+                                {isAuthenticated ? (
+                                  <div onClick={() => toggleSelection(venue.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{
+                                      width: '18px',
+                                      height: '18px',
+                                      borderRadius: '50%',
+                                      background: isSelected ? C : 'transparent',
+                                      border: `1.5px solid ${isSelected ? C : '#999'}`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: isSelected ? '#faf9f5' : '#777',
+                                      fontWeight: 700,
+                                      fontSize: '0.65rem',
+                                      transition: 'all 0.15s',
+                                      flexShrink: 0
+                                    }}>
+                                      {isSelected ? <Check size={10} /> : <Plus size={10} />}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-black text-white text-base tracking-tight mb-0.5">
+                                        {venue.name}
+                                      </h4>
+                                      <span className="text-xs text-zinc-400 font-mono">
+                                        📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h4 className="font-black text-white text-base tracking-tight mb-0.5">
-                                      {venue.name}
-                                    </h4>
-                                    <span className="text-xs text-zinc-400 font-mono">
-                                      📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
-                                    </span>
+                                ) : (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div>
+                                      <h4 className="font-black text-white text-base tracking-tight mb-0.5">
+                                        {venue.name}
+                                      </h4>
+                                      <span className="text-xs text-zinc-400 font-mono">
+                                        📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
+                                )}
 
                                 <span style={{
                                   fontFamily: 'Share Tech Mono, monospace', fontSize: '0.52rem',
@@ -747,55 +763,90 @@ export default function VenuesPage() {
                               )}
 
                               <div className="grid grid-cols-2 gap-3 text-xs text-zinc-400 my-4 border-t border-zinc-800/60 pt-3">
-                                {venue.phone && <div><strong className="text-zinc-500">Phone:</strong> {venue.phone}</div>}
-                                {venue.bookingEmail && <div><strong className="text-zinc-500">Email:</strong> {venue.bookingEmail}</div>}
-                                {venue.averagePay && <div><strong className="text-zinc-500">Avg Pay:</strong> <span style={{ color: C, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
-                                {venue.ageRequirement && <div><strong className="text-zinc-500">Age:</strong> {venue.ageRequirement}</div>}
+                                {isAuthenticated ? (
+                                  <>
+                                    {venue.phone && <div><strong className="text-zinc-500">Phone:</strong> {venue.phone}</div>}
+                                    {venue.bookingEmail && <div><strong className="text-zinc-500">Email:</strong> {venue.bookingEmail}</div>}
+                                    {venue.averagePay && <div><strong className="text-zinc-500">Avg Pay:</strong> <span style={{ color: C, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
+                                    {venue.ageRequirement && <div><strong className="text-zinc-500">Age:</strong> {venue.ageRequirement}</div>}
+                                  </>
+                                ) : (
+                                  <div className="col-span-2 py-1 flex items-center gap-1.5 text-zinc-500 text-[11px] font-mono">
+                                    <span>🔒 Register to unlock contact & pay info</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
                             {/* Card actions */}
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <button
-                                onClick={() => toggleSelection(venue.id)}
-                                style={{ 
-                                  flex: 1, 
-                                  fontSize: '0.65rem', 
-                                  borderColor: isSelected ? OR : 'rgba(255,255,255,0.08)',
-                                  color: isSelected ? OR : 'rgba(255,255,255,0.8)',
-                                  background: isSelected ? 'rgba(197,160,89,0.06)' : 'rgba(255,255,255,0.02)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: '4px'
-                                }}
-                                className="filter-btn"
-                              >
-                                {isSelected ? <><Check size={10} /> IN BOOKING LIST</> : <><Plus size={10} /> ADD TO BOOKING LIST</>}
-                              </button>
-                              
-                              <button
-                                onClick={() => setBookingVenue(venue)}
-                                style={{
-                                  flex: 1.2,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: '0.3rem',
-                                  padding: '0.55rem 0.8rem',
-                                  borderRadius: '4px',
-                                  background: '#faf9f5',
-                                  border: `1.5px solid #faf9f5`,
-                                  color: '#09090b',
-                                  fontWeight: 700,
-                                  fontSize: '0.68rem',
-                                  fontFamily: 'Share Tech Mono, monospace',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                NEGOTIATE GIG <Sparkles size={11} fill="#09090b" />
-                              </button>
-                            </div>
+                            {isAuthenticated ? (
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <button
+                                  onClick={() => toggleSelection(venue.id)}
+                                  style={{ 
+                                    flex: 1, 
+                                    fontSize: '0.65rem', 
+                                    borderColor: isSelected ? OR : 'rgba(255,255,255,0.08)',
+                                    color: isSelected ? OR : 'rgba(255,255,255,0.8)',
+                                    background: isSelected ? 'rgba(197,160,89,0.06)' : 'rgba(255,255,255,0.02)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '4px'
+                                  }}
+                                  className="filter-btn"
+                                >
+                                  {isSelected ? <><Check size={10} /> IN BOOKING LIST</> : <><Plus size={10} /> ADD TO BOOKING LIST</>}
+                                </button>
+                                
+                                <button
+                                  onClick={() => setBookingVenue(venue)}
+                                  style={{
+                                    flex: 1.2,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.3rem',
+                                    padding: '0.55rem 0.8rem',
+                                    borderRadius: '4px',
+                                    background: '#faf9f5',
+                                    border: `1.5px solid #faf9f5`,
+                                    color: '#09090b',
+                                    fontWeight: 700,
+                                    fontSize: '0.68rem',
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  NEGOTIATE GIG <Sparkles size={11} fill="#09090b" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', width: '100%' }}>
+                                <Link
+                                  href="/auth/signup"
+                                  style={{
+                                    width: '100%',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.3rem',
+                                    padding: '0.6rem 1rem',
+                                    borderRadius: '4px',
+                                    background: 'rgba(255,255,255,0.02)',
+                                    border: `1.5px solid rgba(255,255,255,0.08)`,
+                                    color: '#faf9f5',
+                                    fontWeight: 700,
+                                    fontSize: '0.68rem',
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                    cursor: 'pointer'
+                                  }}
+                                  className="hover:bg-zinc-800 transition-colors"
+                                >
+                                  REGISTER TO BOOK OUTPOST <ArrowRight size={10} />
+                                </Link>
+                              </div>
+                            )}
                           </div>
                         );
                       })}

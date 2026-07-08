@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   MapPin, 
@@ -57,6 +58,8 @@ const STATE_NAMES: Record<string, string> = {
 };
 
 export default function BandsPage() {
+  const { data: session } = useSession();
+  const isAuthenticated = !!session;
   const [bands, setBands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -286,9 +289,17 @@ export default function BandsPage() {
 
                               <div className="grid grid-cols-2 gap-3 text-xs text-zinc-400 my-4 border-t border-zinc-800/60 pt-3">
                                 <div><strong className="text-zinc-500">Genre:</strong> {band.genre || "N/A"}</div>
-                                <div><strong className="text-zinc-500">Exp. Draw:</strong> {band.expectedDraw ? `${band.expectedDraw} fans` : "N/A"}</div>
-                                <div><strong className="text-zinc-500">Min Pay:</strong> <span style={{ color: C, fontWeight: 'bold' }}>{band.minimumGuarantee ? `$${band.minimumGuarantee}` : "Negotiable"}</span></div>
-                                <div><strong className="text-zinc-500">Touring:</strong> {band.isTouring ? "Yes" : "Local Only"}</div>
+                                {isAuthenticated ? (
+                                  <>
+                                    <div><strong className="text-zinc-500">Exp. Draw:</strong> {band.expectedDraw ? `${band.expectedDraw} fans` : "N/A"}</div>
+                                    <div><strong className="text-zinc-500">Min Pay:</strong> <span style={{ color: C, fontWeight: 'bold' }}>{band.minimumGuarantee ? `$${band.minimumGuarantee}` : "Negotiable"}</span></div>
+                                    <div><strong className="text-zinc-500">Touring:</strong> {band.isTouring ? "Yes" : "Local Only"}</div>
+                                  </>
+                                ) : (
+                                  <div className="col-span-2 py-1 flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                                    <span>🔒 Register to unlock draw & minimum guarantee stats</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
@@ -12,6 +12,13 @@ export async function GET(req: Request) {
     const bands = await prisma.bandProfile.findMany({
       where: {
         AND: [
+          {
+            user: {
+              NOT: {
+                email: { endsWith: "@vynl.pro" }
+              }
+            }
+          },
           search ? {
             OR: [
               { user: { name: { contains: search, mode: "insensitive" } } },
