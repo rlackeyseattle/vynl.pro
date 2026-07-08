@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
@@ -191,7 +191,7 @@ export default function Home() {
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-bold text-sm">1</div>
               <h4 className="font-bold text-white text-sm">Browse Public Grids</h4>
               <p className="text-zinc-400 text-xs leading-relaxed">
-                Scan active outposts and performing roster structures across any state without sensitive data exposure.
+                Scan active venues and performing roster structures across any state without sensitive data exposure.
               </p>
             </div>
             

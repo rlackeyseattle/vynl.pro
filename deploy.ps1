@@ -132,6 +132,42 @@ if (-not (Test-Path $apiKeyPath)) {
     $apiKeyPath = Join-Path $env:USERPROFILE ".config\antigravity\api_key.json"
 }
 
+# Prefill App Store Connect Metadata
+if (Test-Path $apiKeyPath) {
+    Write-Host "Prefilling App Store Connect metadata..." -ForegroundColor Yellow
+    $bundleId = $null
+    
+    $capConfigPath = Join-Path $PSScriptRoot "capacitor.config.json"
+    if (Test-Path $capConfigPath) {
+        $capConfig = Get-Content $capConfigPath | ConvertFrom-Json
+        $bundleId = $capConfig.appId
+    }
+    
+    $appJsonPath = Join-Path $PSScriptRoot "app.json"
+    if (Test-Path $appJsonPath) {
+        $appJson = Get-Content $appJsonPath | ConvertFrom-Json
+        if ($appJson.expo -and $appJson.expo.ios -and $appJson.expo.ios.bundleIdentifier) {
+            $bundleId = $appJson.expo.ios.bundleIdentifier
+        }
+    }
+    
+    if ($bundleId) {
+        Write-Host "Resolved Bundle ID: $bundleId" -ForegroundColor Green
+        $prefillerScript = Join-Path $env:USERPROFILE ".config\antigravity\prep_appstore_listing.py"
+        if (Test-Path $prefillerScript) {
+            try {
+                python $prefillerScript --bundle-id $bundleId --project-name $projectName --config-path $apiKeyPath
+            } catch {
+                Write-Host "Warning: App Store metadata prefiller encountered an error." -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "App Store metadata prefiller script not found at $prefillerScript" -ForegroundColor DarkYellow
+        }
+    } else {
+        Write-Host "Could not resolve Bundle ID from app.json or capacitor.config.json. Skipping metadata prefill." -ForegroundColor DarkYellow
+    }
+}
+
 # Build/Sign/Upload Steps
 if (Get-Command xcodebuild -ErrorAction SilentlyContinue) {
     Write-Host "Xcode toolchain detected. Instantiating Xcode optimization builds..." -ForegroundColor Yellow

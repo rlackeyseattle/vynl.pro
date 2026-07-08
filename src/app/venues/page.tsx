@@ -503,10 +503,10 @@ export default function VenuesPage() {
             <div className="space-y-4">
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 1.1rem', borderRadius: '100px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}` }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ec4899' }} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: OR, fontWeight: 700 }}>◈ VYNL.PRO // NATIONAL GIG MATCHMAKER</span>
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: OR, fontWeight: 700 }}>◈ VYNL.PRO // VENUE DIRECTORY</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
-                The Outpost Grid
+                The Venue Directory
               </h1>
             </div>
             <button 
@@ -524,7 +524,7 @@ export default function VenuesPage() {
           </div>
 
           <p className="text-zinc-400 max-w-xl text-sm leading-relaxed">
-            {venues.length > 0 ? `${venues.length} active live venues` : "Connecting to Vynl networks..."} — Plot interactive routes on the Technical US Map, select tour segments, and negotiate instant crowd-backed agreements.
+            {venues.length > 0 ? `${venues.length} active live venues` : "Connecting to Vynl networks..."} — Search and filter independent music venues by city, state, genre, or pay structure. Add venues to your list to contact them in bulk.
           </p>
 
           {/* Harvester Input Panel */}
@@ -597,7 +597,7 @@ export default function VenuesPage() {
                   <option value="CLUB">Clubs</option>
                   <option value="BAR">Bars & Dives</option>
                   <option value="THEATER">Theaters</option>
-                  <option value="COOPERATIVE">Cooperative Outposts</option>
+                  <option value="COOPERATIVE">Cooperative Venues</option>
                 </select>
               </div>
 
@@ -646,7 +646,7 @@ export default function VenuesPage() {
         ) : venues.length === 0 ? (
           <div className="text-center py-24 text-zinc-500 border border-dashed border-zinc-800 rounded-2xl">
             <Mic2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="font-bold text-sm">No active outposts found matching your filter criteria.</p>
+            <p className="font-bold text-sm">No active venues found matching your filter criteria.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-10">
@@ -684,7 +684,7 @@ export default function VenuesPage() {
                       <h3 className="font-black text-white text-lg tracking-tighter uppercase font-sans flex items-center gap-2">
                         <span>{stateName.toUpperCase()}</span>
                         <span style={{ fontSize: '0.62rem', background: 'rgba(197,160,89,0.12)', border: `1px solid ${OR}`, padding: '2px 8px', borderRadius: '4px', color: OR, fontFamily: 'Share Tech Mono' }}>
-                          {stateVenues.length} {stateVenues.length === 1 ? 'OUTPOST' : 'OUTPOSTS'}
+                          {stateVenues.length} {stateVenues.length === 1 ? 'VENUE' : 'VENUES'}
                         </span>
                       </h3>
                     </div>
@@ -754,7 +754,7 @@ export default function VenuesPage() {
                                   border: `1.5px solid ${isCooperative ? C : P}`,
                                   padding: '2px 8px', borderRadius: '4px', fontWeight: 800
                                 }}>
-                                  {isCooperative ? "COOP OUTPOST" : "TRADITIONAL"}
+                                  {isCooperative ? "COOP VENUE" : "TRADITIONAL"}
                                 </span>
                               </div>
 
@@ -843,7 +843,7 @@ export default function VenuesPage() {
                                   }}
                                   className="hover:bg-zinc-800 transition-colors"
                                 >
-                                  REGISTER TO BOOK OUTPOST <ArrowRight size={10} />
+                                  REGISTER TO BOOK VENUE <ArrowRight size={10} />
                                 </Link>
                               </div>
                             )}
@@ -877,7 +877,7 @@ export default function VenuesPage() {
               <div style={{ background: '#ec4899' }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-xs">
                 {selectedVenueIds.size}
               </div>
-              <span className="font-bold text-white tracking-wide text-xs" style={{ fontFamily: 'Share Tech Mono, monospace' }}>OUTPOSTS ROUTED</span>
+              <span className="font-bold text-white tracking-wide text-xs" style={{ fontFamily: 'Share Tech Mono, monospace' }}>SELECTED VENUES</span>
             </div>
             <div className="w-px h-8 bg-zinc-800"></div>
             <button 
@@ -909,9 +909,9 @@ export default function VenuesPage() {
               </button>
               
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.8rem', borderRadius: '4px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}`, marginBottom: '0.6rem' }}>
-                <FileText size={12} color={P} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // MASS CUSTOM EMAIL ROUTER v3.0</span>
-              </div>
+                  <FileText size={12} color={P} />
+                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // BULK BOOKING SENDER v3.0</span>
+                </div>
               
               <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>Send Custom Booking Emails</h2>
               <p className="text-zinc-500 text-xs mb-6">Personalize and dispatch custom booking requests to {selectedVenueIds.size} selected venues simultaneously.</p>
@@ -1191,7 +1191,7 @@ export default function VenuesPage() {
 
                 {isCooperative ? (
                   <div style={{ padding: '8px', background: 'rgba(95,138,107,0.08)', border: `1px solid ${C}`, borderRadius: '4px', fontSize: '0.65rem', color: '#88a892', lineHeight: 1.3 }}>
-                    🚀 <strong>Cooperative Outpost Advantage:</strong> Direct door cover matches net you <strong>100%</strong> of door sales, saving you <strong>+${Math.round(grossSales * 0.20)}</strong> over commercial models!
+                    🚀 <strong>Cooperative Venue Advantage:</strong> Direct door cover matches net you <strong>100%</strong> of door sales, saving you <strong>+${Math.round(grossSales * 0.20)}</strong> over commercial models!
                   </div>
                 ) : (
                   <div style={{ padding: '8px', background: 'rgba(197,160,89,0.08)', border: `1px solid ${OR}`, borderRadius: '4px', fontSize: '0.65rem', color: '#c5a059', lineHeight: 1.3 }}>
