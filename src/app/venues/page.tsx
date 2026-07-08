@@ -366,29 +366,30 @@ export default function VenuesPage() {
   const estimatedPayout = Math.max(0, grossSales - venueCut - totalExpenses);
 
   return (
-    <div className="w-full bg-[#faf9f5] min-h-screen text-[#2c2c2c] selection:bg-[#c5a059]/30">
+    <div className="w-full bg-zinc-950 min-h-screen text-zinc-100 selection:bg-[#c5a059]/30">
       
       <style>{`
         /* Grain overlay for vintage parchment sketchbook feel */
         .sketch-grain-overlay {
-          position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.05;
+          position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.02;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
         }
 
         .sketchbook-panel {
           border-radius: 12px;
-          background: #faf9f5;
-          border: 1.5px solid ${BORDER_COLOR};
-          box-shadow: 0 4px 15px rgba(44,44,40,0.03);
+          background: rgba(24, 24, 27, 0.4);
+          border: 1.5px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
           padding: 2rem;
           position: relative;
+          backdrop-filter: blur(10px);
         }
 
         .sketchbook-panel::before {
           content: '';
           position: absolute;
           left: 6px; top: 6px; right: 6px; bottom: 6px;
-          border: 1px dashed rgba(197,160,89,0.3);
+          border: 1px dashed rgba(197,160,89,0.15);
           border-radius: 8px;
           pointer-events: none;
         }
@@ -413,7 +414,7 @@ export default function VenuesPage() {
         }
 
         .modal-sketch-box {
-          background: #faf9f5;
+          background: #09090b;
           border: 2px solid ${OR};
           border-radius: 12px;
           width: 100%;
@@ -422,21 +423,22 @@ export default function VenuesPage() {
           overflow-y: auto;
           position: relative;
           padding: 2.2rem;
-          box-shadow: 0 24px 50px rgba(44,44,40,0.2);
+          box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
+          color: #ffffff;
         }
 
         .modal-sketch-box::before {
           content: '';
           position: absolute;
           left: 6px; top: 6px; right: 6px; bottom: 6px;
-          border: 1px dashed rgba(197,160,89,0.3);
+          border: 1px dashed rgba(197,160,89,0.15);
           border-radius: 8px;
           pointer-events: none;
         }
 
         .signature-draw-canvas {
-          background: #f2eedf;
-          border: 1.5px dashed ${BORDER_COLOR};
+          background: #18181b;
+          border: 1.5px dashed rgba(255, 255, 255, 0.15);
           border-radius: 6px;
           cursor: crosshair;
           touch-action: none;
@@ -489,27 +491,27 @@ export default function VenuesPage() {
       )}
 
       {/* Main Section */}
-      <section className="border-b border-[#d5cfbe] py-14 relative overflow-hidden" style={{ background: '#faf9f5' }}>
+      <section className="border-b border-zinc-900 py-14 relative overflow-hidden bg-zinc-950">
         {/* Subtle watercolor blots */}
-        <div style={{ position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(197,160,89,0.06) 0%, transparent 70%)', filter: 'blur(60px)', top: '-10%', left: '10%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(95,138,107,0.05) 0%, transparent 70%)', filter: 'blur(80px)', bottom: '-15%', right: '10%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(197,160,89,0.03) 0%, transparent 70%)', filter: 'blur(60px)', top: '-10%', left: '10%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.02) 0%, transparent 70%)', filter: 'blur(80px)', bottom: '-15%', right: '10%', pointerEvents: 'none' }} />
         <div className="container mx-auto px-6 space-y-4 relative z-10">
           <div className="flex justify-between items-end flex-wrap gap-4">
             <div className="space-y-4">
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 1.1rem', borderRadius: '100px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}` }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P }} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // NATIONAL GIG MATCHMAKER</span>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ec4899' }} />
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', color: OR, fontWeight: 700 }}>◈ VYNL.PRO // NATIONAL GIG MATCHMAKER</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black text-[#2c2c2c] tracking-tight leading-none" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>
+              <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
                 The Outpost Grid
               </h1>
             </div>
             <button 
               onClick={() => setShowHarvester(!showHarvester)}
               style={{
-                borderColor: showHarvester ? P : BORDER_COLOR,
-                color: showHarvester ? P : CHARCOAL,
-                background: showHarvester ? 'rgba(178,83,41,0.04)' : '#faf9f5'
+                borderColor: showHarvester ? OR : 'rgba(255,255,255,0.15)',
+                color: showHarvester ? OR : 'white',
+                background: showHarvester ? 'rgba(197,160,89,0.06)' : 'rgba(255,255,255,0.02)'
               }}
               className="px-6 py-3 border rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 hover:scale-[1.02] transition-all cursor-pointer shadow-sm"
             >
@@ -518,7 +520,7 @@ export default function VenuesPage() {
             </button>
           </div>
 
-          <p className="text-zinc-600 max-w-xl text-sm leading-relaxed" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-zinc-400 max-w-xl text-sm leading-relaxed">
             {venues.length > 0 ? `${venues.length} active live venues` : "Connecting to Vynl networks..."} — Plot interactive routes on the Technical US Map, select tour segments, and negotiate instant crowd-backed agreements.
           </p>
 
@@ -529,14 +531,14 @@ export default function VenuesPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                style={{ border: `1.5px solid ${BORDER_COLOR}`, background: '#fcfbfa' }}
+                style={{ border: `1.5px solid rgba(255,255,255,0.08)`, background: '#121217' }}
                 className="p-6 rounded-2xl space-y-4 max-w-2xl overflow-hidden"
               >
                 <div>
-                  <h3 className="text-sm font-black text-zinc-800 uppercase tracking-widest flex items-center gap-2">
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                     <Globe size={16} className="text-pink-500" /> Active Venue Finder
                   </h3>
-                  <p className="text-[10px] text-zinc-500 uppercase font-semibold">Queries Grok and cross-references event active statuses</p>
+                  <p className="text-[10px] text-zinc-400 uppercase font-semibold">Queries Grok and cross-references event active statuses</p>
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -544,21 +546,21 @@ export default function VenuesPage() {
                     value={harvestRegion}
                     onChange={e => setHarvestRegion(e.target.value)}
                     placeholder="e.g. Kalispell, MT or Coeur d'Alene, ID"
-                    style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
+                    style={{ borderColor: 'rgba(255,255,255,0.12)', background: '#09090b', color: 'white' }}
                     className="flex-1 border rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#c5a059]"
                   />
                   <button 
                     disabled={harvesting || !harvestRegion}
                     onClick={runHarvester}
-                    style={{ background: CHARCOAL, color: '#faf9f5' }}
-                    className="px-6 py-3 rounded-xl font-bold uppercase text-xs hover:opacity-95 transition-opacity"
+                    style={{ background: '#c5a059', color: '#09090b' }}
+                    className="px-6 py-3 rounded-xl font-bold uppercase text-xs hover:opacity-95 transition-opacity cursor-pointer"
                   >
                     {harvesting ? "Scouting..." : "Discover & Sync"}
                   </button>
                 </div>
 
                 {harvestLogs.length > 0 && (
-                  <div className="bg-[#faf9f5] border border-[#d5cfbe] rounded-xl p-3 h-32 overflow-y-auto font-mono text-[10px] text-zinc-600 space-y-1 custom-scrollbar">
+                  <div className="bg-[#09090b] border border-zinc-800 rounded-xl p-3 h-32 overflow-y-auto font-mono text-[10px] text-zinc-400 space-y-1 custom-scrollbar">
                     {harvestLogs.map((h, i) => <p key={i}>{h}</p>)}
                   </div>
                 )}
@@ -575,59 +577,59 @@ export default function VenuesPage() {
                 placeholder="Search venues by name, city, state..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
-                className="w-full border rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059]"
-              />
-            </div>
-            
-            <div className="relative flex-1">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <select
-                value={type}
-                onChange={e => setType(e.target.value)}
-                style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
-                className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
-              >
-                <option value="">Any Type</option>
-                <option value="CLUB">Clubs</option>
-                <option value="BAR">Bars & Dives</option>
-                <option value="THEATER">Theaters</option>
-                <option value="COOPERATIVE">Cooperative Outposts</option>
-              </select>
-            </div>
+                style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#09090b', color: 'white' }}
+                  className="w-full border rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059]"
+                />
+              </div>
+              
+              <div className="relative flex-1">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <select
+                  value={type}
+                  onChange={e => setType(e.target.value)}
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#09090b', color: 'white' }}
+                  className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
+                >
+                  <option value="">Any Type</option>
+                  <option value="CLUB">Clubs</option>
+                  <option value="BAR">Bars & Dives</option>
+                  <option value="THEATER">Theaters</option>
+                  <option value="COOPERATIVE">Cooperative Outposts</option>
+                </select>
+              </div>
 
-            <div className="relative flex-1">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <select
-                value={genre}
-                onChange={e => setGenre(e.target.value)}
-                style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
-                className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
-              >
-                <option value="">Any Genre</option>
-                <option value="Rock">Rock</option>
-                <option value="Indie">Indie</option>
-                <option value="Acoustic">Acoustic</option>
-                <option value="Metal">Metal</option>
-                <option value="Punk">Punk</option>
-                <option value="Electronic">Electronic</option>
-                <option value="Hip Hop">Hip Hop</option>
-                <option value="Country">Country</option>
-              </select>
-            </div>
+              <div className="relative flex-1">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <select
+                  value={genre}
+                  onChange={e => setGenre(e.target.value)}
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#09090b', color: 'white' }}
+                  className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
+                >
+                  <option value="">Any Genre</option>
+                  <option value="Rock">Rock</option>
+                  <option value="Indie">Indie</option>
+                  <option value="Acoustic">Acoustic</option>
+                  <option value="Metal">Metal</option>
+                  <option value="Punk">Punk</option>
+                  <option value="Electronic">Electronic</option>
+                  <option value="Hip Hop">Hip Hop</option>
+                  <option value="Country">Country</option>
+                </select>
+              </div>
 
-            <div className="relative flex-1">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <select
-                value={state}
-                onChange={e => setState(e.target.value)}
-                style={{ borderColor: BORDER_COLOR, background: '#faf9f5', color: CHARCOAL }}
-                className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
-              >
-                <option value="">All States</option>
-                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
+              <div className="relative flex-1">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <select
+                  value={state}
+                  onChange={e => setState(e.target.value)}
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#09090b', color: 'white' }}
+                  className="w-full border rounded-xl pl-11 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#c5a059] appearance-none"
+                >
+                  <option value="">All States</option>
+                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
           </div>
         </div>
       </section>
@@ -639,7 +641,7 @@ export default function VenuesPage() {
             <Loader2 className="w-10 h-10 text-[#c5a059] animate-spin" />
           </div>
         ) : venues.length === 0 ? (
-          <div className="text-center py-24 text-zinc-500 border border-dashed border-[#d5cfbe] rounded-2xl">
+          <div className="text-center py-24 text-zinc-500 border border-dashed border-zinc-800 rounded-2xl">
             <Mic2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="font-bold text-sm">No active outposts found matching your filter criteria.</p>
           </div>
@@ -675,8 +677,8 @@ export default function VenuesPage() {
 
                 return (
                   <div key={stateCode} className="flex flex-col gap-6">
-                    <div className="border-b border-[#d5cfbe]/60 pb-2 flex items-center justify-between">
-                      <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: '1.25rem', color: CHARCOAL }} className="flex items-center gap-2">
+                    <div className="border-b border-zinc-800/80 pb-2 flex items-center justify-between">
+                      <h3 className="font-black text-white text-lg tracking-tighter uppercase font-sans flex items-center gap-2">
                         <span>{stateName.toUpperCase()}</span>
                         <span style={{ fontSize: '0.62rem', background: 'rgba(197,160,89,0.12)', border: `1px solid ${OR}`, padding: '2px 8px', borderRadius: '4px', color: OR, fontFamily: 'Share Tech Mono' }}>
                           {stateVenues.length} {stateVenues.length === 1 ? 'OUTPOST' : 'OUTPOSTS'}
@@ -695,9 +697,9 @@ export default function VenuesPage() {
                             style={{
                               borderLeft: `4px solid ${isCooperative ? C : P}`,
                               borderColor: isSelected ? OR : (isCooperative ? C : P),
-                              background: isSelected ? 'rgba(197,160,89,0.04)' : 'rgba(44,44,40,0.015)'
+                              background: isSelected ? 'rgba(197,160,89,0.04)' : 'rgba(24,24,27,0.4)'
                             }}
-                            className={`p-5 rounded-lg border border-[#d5cfbe] transition-all duration-200 flex flex-col justify-between`}
+                            className={`p-5 rounded-lg border border-zinc-85 transition-all duration-200 flex flex-col justify-between`}
                           >
                             <div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
@@ -720,10 +722,10 @@ export default function VenuesPage() {
                                     {isSelected ? <Check size={10} /> : <Plus size={10} />}
                                   </div>
                                   <div>
-                                    <h4 style={{ fontSize: '0.98rem', color: CHARCOAL, margin: '0 0 2px 0', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>
+                                    <h4 className="font-black text-white text-base tracking-tight mb-0.5">
                                       {venue.name}
                                     </h4>
-                                    <span style={{ fontSize: '0.68rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
+                                    <span className="text-xs text-zinc-400 font-mono">
                                       📍 {venue.address?.toUpperCase() || "UNKNOWN LOCATION"}
                                     </span>
                                   </div>
@@ -741,14 +743,14 @@ export default function VenuesPage() {
                               </div>
 
                               {venue.bookingHistory && (
-                                <p style={{ fontSize: '0.72rem', color: '#555', lineHeight: 1.4, marginBottom: '0.8rem' }}>{venue.bookingHistory}</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed my-3">{venue.bookingHistory}</p>
                               )}
 
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.7rem', color: '#555', marginBottom: '1rem', borderTop: '1px solid rgba(44,44,40,0.05)', paddingTop: '0.5rem' }}>
-                                {venue.phone && <div><strong>Phone:</strong> {venue.phone}</div>}
-                                {venue.bookingEmail && <div><strong>Email:</strong> {venue.bookingEmail}</div>}
-                                {venue.averagePay && <div><strong>Avg Pay:</strong> <span style={{ color: G, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
-                                {venue.ageRequirement && <div><strong>Age:</strong> {venue.ageRequirement}</div>}
+                              <div className="grid grid-cols-2 gap-3 text-xs text-zinc-400 my-4 border-t border-zinc-800/60 pt-3">
+                                {venue.phone && <div><strong className="text-zinc-500">Phone:</strong> {venue.phone}</div>}
+                                {venue.bookingEmail && <div><strong className="text-zinc-500">Email:</strong> {venue.bookingEmail}</div>}
+                                {venue.averagePay && <div><strong className="text-zinc-500">Avg Pay:</strong> <span style={{ color: C, fontWeight: 'bold' }}>{venue.averagePay}</span></div>}
+                                {venue.ageRequirement && <div><strong className="text-zinc-500">Age:</strong> {venue.ageRequirement}</div>}
                               </div>
                             </div>
 
@@ -759,9 +761,9 @@ export default function VenuesPage() {
                                 style={{ 
                                   flex: 1, 
                                   fontSize: '0.65rem', 
-                                  borderColor: isSelected ? C : BORDER_COLOR,
-                                  color: isSelected ? C : '#555',
-                                  background: isSelected ? 'rgba(95,138,107,0.04)' : 'rgba(44,44,40,0.015)',
+                                  borderColor: isSelected ? OR : 'rgba(255,255,255,0.08)',
+                                  color: isSelected ? OR : 'rgba(255,255,255,0.8)',
+                                  background: isSelected ? 'rgba(197,160,89,0.06)' : 'rgba(255,255,255,0.02)',
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -782,16 +784,16 @@ export default function VenuesPage() {
                                   gap: '0.3rem',
                                   padding: '0.55rem 0.8rem',
                                   borderRadius: '4px',
-                                  background: CHARCOAL,
-                                  border: `1.5px solid ${CHARCOAL}`,
-                                  color: '#faf9f5',
+                                  background: '#faf9f5',
+                                  border: `1.5px solid #faf9f5`,
+                                  color: '#09090b',
                                   fontWeight: 700,
                                   fontSize: '0.68rem',
                                   fontFamily: 'Share Tech Mono, monospace',
                                   cursor: 'pointer'
                                 }}
                               >
-                                NEGOTIATE GIG <Sparkles size={11} fill="#faf9f5" />
+                                NEGOTIATE GIG <Sparkles size={11} fill="#09090b" />
                               </button>
                             </div>
                           </div>
@@ -814,23 +816,23 @@ export default function VenuesPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             style={{ 
-              background: '#faf9f5', 
-              border: `1.5px solid ${BORDER_COLOR}`,
-              boxShadow: '0 10px 30px rgba(197,160,89,0.15)'
+              background: '#09090b', 
+              border: `1.5px solid rgba(255,255,255,0.08)`,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
             }}
             className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 px-8 py-4 rounded-full backdrop-blur-md"
           >
             <div className="flex items-center gap-3">
-              <div style={{ background: P }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-xs">
+              <div style={{ background: '#ec4899' }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-xs">
                 {selectedVenueIds.size}
               </div>
-              <span className="font-bold text-[#2c2c2c] tracking-wide text-xs" style={{ fontFamily: 'Share Tech Mono, monospace' }}>OUTPOSTS ROUTED</span>
+              <span className="font-bold text-white tracking-wide text-xs" style={{ fontFamily: 'Share Tech Mono, monospace' }}>OUTPOSTS ROUTED</span>
             </div>
-            <div className="w-px h-8 bg-[#d5cfbe]"></div>
+            <div className="w-px h-8 bg-zinc-800"></div>
             <button 
               onClick={() => setShowBookingModal(true)}
-              style={{ background: CHARCOAL, color: '#faf9f5' }}
-              className="px-6 py-2 hover:opacity-90 rounded-full font-black text-xs flex items-center gap-2 uppercase tracking-wider"
+              style={{ background: '#c5a059', color: '#09090b' }}
+              className="px-6 py-2 hover:opacity-90 rounded-full font-black text-xs flex items-center gap-2 uppercase tracking-wider cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" /> Email Booking List
             </button>
@@ -850,7 +852,7 @@ export default function VenuesPage() {
             >
               <button 
                 onClick={() => setShowBookingModal(false)}
-                className="absolute top-6 right-6 text-zinc-500 hover:text-charcoal"
+                className="absolute top-6 right-6 text-zinc-500 hover:text-white"
               >
                 <X size={20} />
               </button>
@@ -860,16 +862,16 @@ export default function VenuesPage() {
                 <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL.PRO // MASS CUSTOM EMAIL ROUTER v3.0</span>
               </div>
               
-              <h2 className="text-2xl font-black text-charcoal uppercase tracking-tighter mb-1" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>Send Custom Booking Emails</h2>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1" style={{ fontFamily: 'Cinzel, EB Garamond, serif' }}>Send Custom Booking Emails</h2>
               <p className="text-zinc-500 text-xs mb-6">Personalize and dispatch custom booking requests to {selectedVenueIds.size} selected venues simultaneously.</p>
               
               {sendingProgress ? (
                 <div className="py-12 text-center space-y-4">
                   <Loader2 className="w-10 h-10 animate-spin text-[#c5a059] mx-auto" />
-                  <h3 className="text-sm font-black text-charcoal uppercase tracking-wider">
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
                     Sending Email {sendingProgress.current} of {sendingProgress.total}
                   </h3>
-                  <div className="w-full bg-[#f2eedf] h-2 rounded-full overflow-hidden max-w-xs mx-auto">
+                  <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden max-w-xs mx-auto">
                     <div 
                       className="bg-[#c5a059] h-full transition-all duration-300"
                       style={{ width: `${(sendingProgress.current / sendingProgress.total) * 100}%` }}
@@ -884,7 +886,7 @@ export default function VenuesPage() {
                       <input 
                         type="text" 
                         placeholder="e.g. Mid-October 2026, Weekends"
-                        className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
+                        className="w-full bg-[#18181b] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
                         value={bookingDraft.dates}
                         onChange={(e) => setBookingDraft(prev => ({...prev, dates: e.target.value}))}
                       />
@@ -893,7 +895,7 @@ export default function VenuesPage() {
                       <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Your Artist Name</label>
                       <input 
                         type="text" 
-                        className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
+                        className="w-full bg-[#18181b] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#c5a059] transition-colors text-xs"
                         value={artistName}
                         onChange={(e) => setArtistName(e.target.value)}
                       />
@@ -905,7 +907,7 @@ export default function VenuesPage() {
                     <input 
                       type="text" 
                       placeholder="Subject template"
-                      className="w-full bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2.5 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors text-xs font-bold"
+                      className="w-full bg-[#18181b] border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-[#c5a059] transition-colors text-xs font-bold"
                       value={emailSubject}
                       onChange={(e) => setEmailSubject(e.target.value)}
                     />
@@ -915,30 +917,30 @@ export default function VenuesPage() {
                     <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Custom Pitch Body</label>
                     <textarea 
                       placeholder="Hi {venue_name}..."
-                      className="w-full h-32 bg-[#f2eedf] border border-[#d5cfbe] rounded-xl px-3 py-2.5 text-charcoal focus:outline-none focus:border-[#c5a059] transition-colors resize-none text-xs font-medium"
+                      className="w-full h-32 bg-[#18181b] border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-[#c5a059] transition-colors resize-none text-xs font-medium"
                       value={emailBody}
                       onChange={(e) => setEmailBody(e.target.value)}
                     />
                   </div>
 
                   {/* Merge Tags Help */}
-                  <div className="bg-[#f5f2e6] border border-[#e3dac9] p-3 rounded-xl">
-                    <div className="text-[9px] font-black uppercase text-zinc-500 mb-1.5" style={{ fontFamily: 'Share Tech Mono, monospace' }}>◈ Merge tags (auto-replaced per email):</div>
+                  <div className="bg-[#18181b]/60 border border-zinc-800 p-3 rounded-xl">
+                    <div className="text-[9px] font-black uppercase text-zinc-400 mb-1.5" style={{ fontFamily: 'Share Tech Mono, monospace' }}>◈ Merge tags (auto-replaced per email):</div>
                     <div className="flex flex-wrap gap-2 text-[10px]">
-                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{venue_name}"}</span>
-                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{venue_address}"}</span>
-                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{dates}"}</span>
-                      <span className="bg-white border border-[#d5cfbe] px-2 py-0.5 rounded font-mono">{"{artist_name}"}</span>
+                      <span className="bg-[#09090b] border border-zinc-850 text-zinc-300 px-2 py-0.5 rounded font-mono">{"{venue_name}"}</span>
+                      <span className="bg-[#09090b] border border-zinc-850 text-zinc-300 px-2 py-0.5 rounded font-mono">{"{venue_address}"}</span>
+                      <span className="bg-[#09090b] border border-zinc-850 text-zinc-300 px-2 py-0.5 rounded font-mono">{"{dates}"}</span>
+                      <span className="bg-[#09090b] border border-zinc-850 text-zinc-300 px-2 py-0.5 rounded font-mono">{"{artist_name}"}</span>
                     </div>
                   </div>
 
                   {/* Selected Recipients Preview */}
-                  <div className="max-h-24 overflow-y-auto bg-[#faf9f5] border border-[#d5cfbe] p-3 rounded-xl space-y-1.5">
-                    <div className="text-[9px] font-black uppercase text-zinc-500" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Recipients list ({selectedVenueIds.size}):</div>
+                  <div className="max-h-24 overflow-y-auto bg-[#09090b] border border-zinc-800 p-3 rounded-xl space-y-1.5">
+                    <div className="text-[9px] font-black uppercase text-zinc-400" style={{ fontFamily: 'Share Tech Mono, monospace' }}>Recipients list ({selectedVenueIds.size}):</div>
                     {venues.filter(v => selectedVenueIds.has(v.id)).map(v => (
-                      <div key={v.id} className="text-[10px] text-zinc-600 flex justify-between font-bold">
+                      <div key={v.id} className="text-[10px] text-zinc-300 flex justify-between font-bold">
                         <span>{v.name}</span>
-                        <span className="font-mono text-[9px]">{v.bookingEmail || v.contactEmail || "No Email listed"}</span>
+                        <span className="font-mono text-[9px] text-zinc-500">{v.bookingEmail || v.contactEmail || "No Email listed"}</span>
                       </div>
                     ))}
                   </div>
@@ -947,7 +949,7 @@ export default function VenuesPage() {
                     onClick={handleBulkBooking}
                     disabled={isSending || !emailBody || !emailSubject || !bookingDraft.dates}
                     style={{ background: C, border: `2px solid ${C}` }}
-                    className="w-full py-3.5 disabled:opacity-50 text-white font-black text-xs uppercase rounded-xl transition-all flex justify-center items-center gap-2 tracking-wider"
+                    className="w-full py-3.5 disabled:opacity-50 text-white font-black text-xs uppercase rounded-xl transition-all flex justify-center items-center gap-2 tracking-wider cursor-pointer"
                   >
                     DISPATCH MASS CUSTOM EMAILS
                   </button>
@@ -965,21 +967,21 @@ export default function VenuesPage() {
             {/* Close Button */}
             <button 
               onClick={() => setBookingVenue(null)}
-              className="absolute top-6 right-6 text-zinc-500 hover:text-charcoal"
+              className="absolute top-6 right-6 text-zinc-500 hover:text-white"
             >
               <X size={20} />
             </button>
 
             {/* Header */}
-            <div style={{ marginBottom: '1.5rem', borderBottom: `1.5px solid ${BORDER_COLOR}`, paddingBottom: '1rem' }}>
+            <div style={{ marginBottom: '1.5rem', borderBottom: `1.5px solid rgba(255,255,255,0.08)`, paddingBottom: '1rem' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.8rem', borderRadius: '4px', background: 'rgba(197,160,89,0.08)', border: `1.5px solid ${OR}`, marginBottom: '0.6rem' }}>
-                <FileText size={12} color={P} />
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: P, fontWeight: 700 }}>◈ VYNL PRO CONTRACT BUILDER v1.2</span>
+                <FileText size={12} color={OR} />
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.08em', color: OR, fontWeight: 700 }}>◈ VYNL PRO CONTRACT BUILDER v1.2</span>
               </div>
-              <h2 style={{ fontFamily: 'Cinzel, EB Garamond, serif', fontSize: '1.6rem', color: CHARCOAL, margin: '0 0 4px 0', fontWeight: 900 }}>
+              <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-1">
                 Gig Negotiation Desk
               </h2>
-              <span style={{ fontSize: '0.78rem', color: '#555', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
                 {bookingVenue.name} · {bookingVenue.address || bookingVenue.city}
               </span>
             </div>
@@ -989,14 +991,14 @@ export default function VenuesPage() {
               
               {/* Parameter Settings */}
               <div>
-                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', fontWeight: 800, color: CHARCOAL, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h3 className="text-xs font-black text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <Sliders size={14} color={OR} /> NEGOTIATION TERMS
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {/* Select show date */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: '#555550', fontWeight: 700, marginBottom: '0.3rem' }}>CHOOSE PERFORMANCE DATE</label>
+                    <label style={{ display: 'block', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '0.3rem' }}>CHOOSE PERFORMANCE DATE</label>
                     <select
                       value={bookingDate}
                       onChange={e => setBookingDate(e.target.value)}
@@ -1005,8 +1007,9 @@ export default function VenuesPage() {
                         width: '100%',
                         padding: '0.5rem',
                         borderRadius: '4px',
-                        border: '1.5px solid #d5cfbe',
-                        background: '#faf9f5',
+                        border: '1.5px solid rgba(255,255,255,0.08)',
+                        background: '#18181b',
+                        color: 'white',
                         fontSize: '0.75rem',
                         fontFamily: 'Share Tech Mono, monospace',
                         fontWeight: 700
@@ -1020,9 +1023,9 @@ export default function VenuesPage() {
 
                   {/* Slider: Ticket price */}
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: '#555550', fontWeight: 700, marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '0.2rem' }}>
                       <span>TICKET COVER PRICE</span>
-                      <strong style={{ color: P }}>${ticketPrice}</strong>
+                      <strong style={{ color: OR }}>${ticketPrice}</strong>
                     </div>
                     <input
                       type="range"
@@ -1032,13 +1035,13 @@ export default function VenuesPage() {
                       value={ticketPrice}
                       onChange={e => setTicketPrice(Number(e.target.value))}
                       disabled={isContractSigned}
-                      style={{ width: '100%', accentColor: P }}
+                      style={{ width: '100%', accentColor: OR }}
                     />
                   </div>
 
                   {/* Slider: Expected Attendance */}
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: '#555550', fontWeight: 700, marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '0.2rem' }}>
                       <span>EXPECTED ATTENDANCE</span>
                       <strong style={{ color: C }}>{expectedAttendance} fans</strong>
                     </div>
@@ -1052,12 +1055,12 @@ export default function VenuesPage() {
                       disabled={isContractSigned}
                       style={{ width: '100%', accentColor: C }}
                     />
-                    <span style={{ display: 'block', fontSize: '0.55rem', color: '#888', marginTop: '2px', textAlign: 'right' }}>Standard Draw Cap: 250</span>
+                    <span style={{ display: 'block', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px', textAlign: 'right' }}>Standard Draw Cap: 250</span>
                   </div>
 
                   {/* Rider Toggles */}
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: '#555550', fontWeight: 700, marginBottom: '0.4rem' }}>CONTRACT RIDER TOGGLES</span>
+                    <span style={{ display: 'block', fontSize: '0.62rem', fontFamily: 'Share Tech Mono, monospace', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '0.4rem' }}>CONTRACT RIDER TOGGLES</span>
                     
                     <div 
                       onClick={() => !isContractSigned && setCateringSelected(!cateringSelected)}
@@ -1065,13 +1068,13 @@ export default function VenuesPage() {
                     >
                       <div style={{
                         width: 13, height: 13, borderRadius: '2px',
-                        border: `1.5px solid ${cateringSelected ? P : '#d5cfbe'}`,
+                        border: `1.5px solid ${cateringSelected ? OR : 'rgba(255,255,255,0.2)'}`,
                         display: 'flex', alignItems: 'center',
-                        background: cateringSelected ? P : 'transparent',
+                        background: cateringSelected ? OR : 'transparent',
                       }}>
-                        {cateringSelected && <Check size={9} color="#faf9f5" strokeWidth={4} style={{ margin: 'auto' }} />}
+                        {cateringSelected && <Check size={9} color="#09090b" strokeWidth={4} style={{ margin: 'auto' }} />}
                       </div>
-                      <span style={{ color: CHARCOAL }}>Green Room Catering (cooperative covers meal for free!)</span>
+                      <span className="text-zinc-350">Green Room Catering (cooperative covers meal for free!)</span>
                     </div>
 
                     <div 
@@ -1080,13 +1083,13 @@ export default function VenuesPage() {
                     >
                       <div style={{
                         width: 13, height: 13, borderRadius: '2px',
-                        border: `1.5px solid ${soundEngSelected ? P : '#d5cfbe'}`,
+                        border: `1.5px solid ${soundEngSelected ? OR : 'rgba(255,255,255,0.2)'}`,
                         display: 'flex', alignItems: 'center',
-                        background: soundEngSelected ? P : 'transparent',
+                        background: soundEngSelected ? OR : 'transparent',
                       }}>
-                        {soundEngSelected && <Check size={9} color="#faf9f5" strokeWidth={4} style={{ margin: 'auto' }} />}
+                        {soundEngSelected && <Check size={9} color="#09090b" strokeWidth={4} style={{ margin: 'auto' }} />}
                       </div>
-                      <span style={{ color: CHARCOAL }}>Dedicated Front-of-House Engineer ($120 fee)</span>
+                      <span className="text-zinc-350">Dedicated Front-of-House Engineer ($120 fee)</span>
                     </div>
 
                     <div 
@@ -1095,52 +1098,52 @@ export default function VenuesPage() {
                     >
                       <div style={{
                         width: 13, height: 13, borderRadius: '2px',
-                        border: `1.5px solid ${localTransportSelected ? P : '#d5cfbe'}`,
+                        border: `1.5px solid ${localTransportSelected ? OR : 'rgba(255,255,255,0.2)'}`,
                         display: 'flex', alignItems: 'center',
-                        background: localTransportSelected ? P : 'transparent',
+                        background: localTransportSelected ? OR : 'transparent',
                       }}>
-                        {localTransportSelected && <Check size={9} color="#faf9f5" strokeWidth={4} style={{ margin: 'auto' }} />}
+                        {localTransportSelected && <Check size={9} color="#09090b" strokeWidth={4} style={{ margin: 'auto' }} />}
                       </div>
-                      <span style={{ color: CHARCOAL }}>Ground Transport Shuttle ($150 fee)</span>
+                      <span className="text-zinc-350">Ground Transport Shuttle ($150 fee)</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Financial Math Display */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(44,44,40,0.02)', padding: '1.2rem', borderRadius: '8px', border: `1.5px solid ${BORDER_COLOR}` }}>
-                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', fontWeight: 800, color: CHARCOAL, margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.015)', padding: '1.2rem', borderRadius: '8px', border: `1.5px solid rgba(255,255,255,0.08)` }}>
+                <h3 className="text-xs font-black text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <DollarSign size={14} color={C} /> FINANCIAL MATRIX
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem', borderBottom: `1px solid ${BORDER_COLOR}`, paddingBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem', borderBottom: `1px solid rgba(255,255,255,0.08)`, paddingBottom: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#555' }}>Gross Ticket Sales:</span>
-                    <strong style={{ color: CHARCOAL }}>${grossSales.toLocaleString()}</strong>
+                    <span className="text-zinc-400">Gross Ticket Sales:</span>
+                    <strong className="text-white">${grossSales.toLocaleString()}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#555' }}>Venue Platform Cut:</span>
-                    <strong style={{ color: PK }}>-${venueCut}</strong>
+                    <span className="text-zinc-400">Venue Platform Cut:</span>
+                    <strong className="text-red-400">-${venueCut}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#555' }}>Technical Specs Rider:</span>
-                    <strong style={{ color: PK }}>-${totalExpenses}</strong>
+                    <span className="text-zinc-400">Technical Specs Rider:</span>
+                    <strong className="text-red-400">-${totalExpenses}</strong>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.5rem 0' }}>
-                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.55rem', color: '#555550', fontWeight: 700 }}>ESTIMATED NET PAYOUT</span>
-                  <span style={{ fontSize: '1.75rem', fontFamily: 'Outfit, sans-serif', fontWeight: 900, color: C }}>
+                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>ESTIMATED NET PAYOUT</span>
+                  <span className="text-3xl font-black text-emerald-400">
                     ${estimatedPayout.toLocaleString()}
                   </span>
                 </div>
 
                 {isCooperative ? (
-                  <div style={{ padding: '8px', background: 'rgba(95,138,107,0.08)', border: `1px solid ${C}`, borderRadius: '4px', fontSize: '0.65rem', color: G, lineHeight: 1.3 }}>
+                  <div style={{ padding: '8px', background: 'rgba(95,138,107,0.08)', border: `1px solid ${C}`, borderRadius: '4px', fontSize: '0.65rem', color: '#88a892', lineHeight: 1.3 }}>
                     🚀 <strong>Cooperative Outpost Advantage:</strong> Direct door cover matches net you <strong>100%</strong> of door sales, saving you <strong>+${Math.round(grossSales * 0.20)}</strong> over commercial models!
                   </div>
                 ) : (
-                  <div style={{ padding: '8px', background: 'rgba(197,160,89,0.08)', border: `1px solid ${OR}`, borderRadius: '4px', fontSize: '0.65rem', color: '#6b542c', lineHeight: 1.3 }}>
+                  <div style={{ padding: '8px', background: 'rgba(197,160,89,0.08)', border: `1px solid ${OR}`, borderRadius: '4px', fontSize: '0.65rem', color: '#c5a059', lineHeight: 1.3 }}>
                     ⚠️ <strong>Traditional Venue Policy:</strong> Traditional clubs charge a standard 20% commission on door cover to offset local building rent & operations.
                   </div>
                 )}
@@ -1149,10 +1152,10 @@ export default function VenuesPage() {
             </div>
 
             {/* Digital Signature Panel */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: `1.5px solid ${BORDER_COLOR}`, paddingTop: '1.2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: `1.5px solid rgba(255,255,255,0.08)`, paddingTop: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: CHARCOAL, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <PenTool size={12} color={P} /> SIGN DRAFT AGREEMENT BELOW
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: 'rgba(255,255,255,0.8)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <PenTool size={12} color={OR} /> SIGN DRAFT AGREEMENT BELOW
                 </span>
                 {!isContractSigned && (
                   <button 
@@ -1191,7 +1194,7 @@ export default function VenuesPage() {
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
                     boxShadow: '0 0 10px rgba(166,58,58,0.15)',
-                    background: '#faf9f5',
+                    background: '#18181b',
                     zIndex: 10,
                     opacity: 0.85
                   }}>
@@ -1199,22 +1202,22 @@ export default function VenuesPage() {
                   </div>
 
                   <span style={{ display: 'block', fontSize: '1.5rem', marginBottom: '0.4rem' }}>🤝</span>
-                  <strong style={{ display: 'block', color: G, fontSize: '0.9rem', fontFamily: 'Outfit', fontWeight: 800 }}>CAMPAIGN SIGNED &amp; BROADCAST ON THE VYNL EDGE NETWORK</strong>
-                  <span style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.55rem', color: '#555', marginTop: '4px' }}>
+                  <strong className="block text-[#88a892] text-sm mb-1 uppercase tracking-wider">CAMPAIGN SIGNED &amp; BROADCAST ON THE VYNL EDGE NETWORK</strong>
+                  <span style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
                     TIMESTAMP RECORDED: {new Date().toLocaleDateString()} // {bookingDate} PERFORMANCE SEALED
                   </span>
                   
                   <div style={{ marginTop: '1.2rem', display: 'flex', gap: '10px', justifyContent: 'center' }}>
                     <button
                       onClick={() => setBookingVenue(null)}
-                      className="filter-btn active"
+                      className="filter-btn active cursor-pointer"
                       style={{ fontSize: '0.68rem', padding: '0.5rem 1.4rem' }}
                     >
                       CLOSE NEGOTIATION DESK
                     </button>
                     <button
                       onClick={() => setIsContractSigned(false)}
-                      className="filter-btn"
+                      className="filter-btn cursor-pointer"
                       style={{ fontSize: '0.68rem', padding: '0.5rem 1rem', color: PK, borderColor: 'rgba(166,58,58,0.4)' }}
                     >
                       VOID &amp; REDRAFT
@@ -1241,7 +1244,7 @@ export default function VenuesPage() {
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                     <button
                       onClick={() => setBookingVenue(null)}
-                      className="filter-btn"
+                      className="filter-btn cursor-pointer"
                       style={{ fontSize: '0.68rem' }}
                     >
                       ABORT DRAFT
