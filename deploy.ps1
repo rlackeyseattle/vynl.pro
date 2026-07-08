@@ -120,7 +120,7 @@ if (Get-Command vercel -ErrorAction SilentlyContinue) {
 Write-Host "`n[STAGE 3] Native Mobile Delivery (iOS Engine)..." -ForegroundColor Cyan
 
 # Sync Capacitor assets
-if (Test-Path (Join-Path $PSScriptRoot "capacitor.config.json")) {
+if ((Test-Path (Join-Path $PSScriptRoot "capacitor.config.json")) -or (Test-Path (Join-Path $PSScriptRoot "capacitor.config.ts"))) {
     Write-Host "Syncing Capacitor assets with native project..." -ForegroundColor Yellow
     npx cap sync ios
 }

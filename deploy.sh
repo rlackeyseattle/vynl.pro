@@ -116,7 +116,7 @@ fi
 echo -e "\n\033[0;36m[STAGE 3] Native Mobile Delivery (iOS Engine)...\033[0m"
 
 # Sync Capacitor assets
-if [ -f "capacitor.config.json" ]; then
+if [ -f "capacitor.config.json" ] || [ -f "capacitor.config.ts" ]; then
     echo -e "\033[0;33mSyncing Capacitor assets with native project...\033[0m"
     npx cap sync ios
 fi
