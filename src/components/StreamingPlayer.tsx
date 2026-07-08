@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Music, Disc, Radio, Play, ExternalLink } from "lucide-react";
+import { Disc, Radio, Music, ExternalLink } from "lucide-react";
 
 const Youtube = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -26,8 +25,6 @@ export function StreamingPlayer({
   bandcampUrl,
   soundcloudUrl,
 }: StreamingPlayerProps) {
-  const [activeTab, setActiveTab] = useState<string>("");
-
   // Parse Embed URLs
   const getSpotifyEmbed = (url: string) => {
     try {
@@ -72,7 +69,7 @@ export function StreamingPlayer({
   };
 
   const getSoundcloudEmbed = (url: string) => {
-    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ec4899&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23c5a059&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
   };
 
   const getTidalEmbed = (url: string) => {
@@ -87,23 +84,15 @@ export function StreamingPlayer({
     }
   };
 
-  // Determine active services
-  const tabs = [
-    { id: "spotify", label: "Spotify", url: spotifyUrl, icon: <Disc className="w-4 h-4 text-emerald-400" />, getEmbed: getSpotifyEmbed, height: 152 },
-    { id: "youtube", label: "YouTube", url: youtubeUrl, icon: <Youtube className="w-4 h-4 text-red-500" />, getEmbed: getYoutubeEmbed, height: 315 },
-    { id: "soundcloud", label: "SoundCloud", url: soundcloudUrl, icon: <Radio className="w-4 h-4 text-orange-500" />, getEmbed: getSoundcloudEmbed, height: 166 },
+  const activeMedia = [
+    { id: "youtube", label: "YouTube Video", url: youtubeUrl, icon: <Youtube className="w-4 h-4 text-red-500" />, getEmbed: getYoutubeEmbed, isVideo: true },
+    { id: "spotify", label: "Spotify Player", url: spotifyUrl, icon: <Disc className="w-4 h-4 text-emerald-400" />, getEmbed: getSpotifyEmbed, height: 152 },
     { id: "apple", label: "Apple Music", url: appleMusicUrl, icon: <Music className="w-4 h-4 text-pink-500" />, getEmbed: getAppleMusicEmbed, height: 175 },
-    { id: "tidal", label: "Tidal", url: tidalUrl, icon: <Disc className="w-4 h-4 text-cyan-400" />, getEmbed: getTidalEmbed, height: 150 },
+    { id: "soundcloud", label: "SoundCloud Playlist", url: soundcloudUrl, icon: <Radio className="w-4 h-4 text-orange-500" />, getEmbed: getSoundcloudEmbed, height: 166 },
+    { id: "tidal", label: "Tidal Player", url: tidalUrl, icon: <Disc className="w-4 h-4 text-cyan-400" />, getEmbed: getTidalEmbed, height: 150 },
   ].filter(t => !!t.url);
 
-  // Set default active tab
-  useEffect(() => {
-    if (tabs.length > 0 && !activeTab) {
-      setActiveTab(tabs[0].id);
-    }
-  }, [tabs, activeTab]);
-
-  if (tabs.length === 0) {
+  if (activeMedia.length === 0) {
     return (
       <div className="glass rounded-3xl border border-zinc-800 p-8 text-center space-y-4 bg-zinc-950/40">
         <Music className="w-12 h-12 text-zinc-700 mx-auto" />
@@ -115,63 +104,56 @@ export function StreamingPlayer({
     );
   }
 
-  const currentTab = tabs.find(t => t.id === activeTab) || tabs[0];
-
   return (
-    <div className="glass rounded-3xl border border-zinc-800 bg-zinc-900/10 overflow-hidden flex flex-col">
-      {/* Skinned Navigation Tabs */}
-      <div className="flex items-center gap-2 p-3 bg-zinc-950/80 border-b border-zinc-800 overflow-x-auto scrollbar-none">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs uppercase transition-all duration-300 ${
-              activeTab === tab.id
-                ? "bg-zinc-850 border border-zinc-700 text-white shadow-md"
-                : "bg-transparent border border-transparent text-zinc-400 hover:text-white"
-            }`}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Embed Frame view */}
-      <div className="p-4 bg-black/40 flex-1 flex flex-col justify-center min-h-[200px]">
-        {currentTab.id === "youtube" ? (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-zinc-800">
-            <iframe
-              src={currentTab.getEmbed(currentTab.url!)}
-              title="YouTube video player"
-              className="absolute inset-0 w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+    <div className="flex flex-col gap-8">
+      {activeMedia.map((media) => (
+        <div 
+          key={media.id} 
+          className="glass rounded-3xl border border-zinc-800/80 bg-zinc-900/10 overflow-hidden flex flex-col p-5 gap-4"
+        >
+          {/* Header indicator */}
+          <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+            <div className="flex items-center gap-2">
+              {media.icon}
+              <span className="text-[10px] font-black uppercase text-zinc-300 tracking-wider">
+                {media.label}
+              </span>
+            </div>
+            <a
+              href={media.url!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-zinc-500 hover:text-[#c5a059] transition-colors"
+            >
+              Open Link <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
-        ) : (
-          <iframe
-            src={currentTab.getEmbed(currentTab.url!)}
-            width="100%"
-            height={currentTab.height}
-            className="border-0 rounded-xl overflow-hidden"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          />
-        )}
-        
-        {/* External Link */}
-        <div className="flex justify-end mt-3">
-          <a
-            href={currentTab.url!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-zinc-500 hover:text-pink-500 transition-colors"
-          >
-            Open on {currentTab.label} <ExternalLink className="w-3 h-3" />
-          </a>
+
+          {/* Player Frame */}
+          <div className="flex-1 flex flex-col justify-center">
+            {media.isVideo ? (
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-zinc-800/80">
+                <iframe
+                  src={media.getEmbed(media.url!)}
+                  title="YouTube video player"
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <iframe
+                src={media.getEmbed(media.url!)}
+                width="100%"
+                height={media.height}
+                className="border-0 rounded-2xl overflow-hidden"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }

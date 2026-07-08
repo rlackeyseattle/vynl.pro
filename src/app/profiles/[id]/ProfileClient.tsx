@@ -180,7 +180,13 @@ export default function ProfileClient({ type, data }: ProfileClientProps) {
                   )}
                   {data.coverOrOriginal && (
                     <span className="px-4 py-1.5 bg-zinc-800/60 text-zinc-300 border border-zinc-700/50 rounded-full font-black text-[10px] tracking-wider uppercase">
-                      {data.coverOrOriginal}
+                      {data.coverOrOriginal === "BOTH" 
+                        ? "ORIGINAL & COVERS" 
+                        : data.coverOrOriginal === "ORIGINAL" 
+                          ? "ORIGINALS ONLY" 
+                          : data.coverOrOriginal === "COVER" 
+                            ? "COVERS ONLY" 
+                            : data.coverOrOriginal}
                     </span>
                   )}
                   {data.isSigned && (
