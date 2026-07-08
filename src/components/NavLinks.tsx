@@ -7,6 +7,7 @@ import { Zap } from "lucide-react";
 const links = [
   { href: "/map", label: "Dashboard" },
   { href: "/venues", label: "Venues" },
+  { href: "/bands", label: "Bands" },
   { href: "/pilot", label: "Booking Agent" },
   { href: "/discover", label: "Direct Booking", highlight: true },
 ];
