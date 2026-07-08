@@ -136,11 +136,7 @@ export default function SettingsClient({ role, initialProfile, initialUser }: Se
     if (result.success) {
       setMessage({ type: "success", text: "Profile updated successfully!" });
       router.refresh();
-      // Redirect to the updated slug profile if set
-      const profilePath = result.slug ? `/${result.slug}` : `/profiles/${initialProfile?.id}`;
-      setTimeout(() => {
-        router.push(profilePath);
-      }, 1500);
+      setLoading(false);
     } else {
       setMessage({ type: "error", text: result.error || "Failed to update profile." });
       setLoading(false);
