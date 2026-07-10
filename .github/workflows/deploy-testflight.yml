@@ -44,9 +44,9 @@ jobs:
 
       - name: Setup CocoaPods
         run: |
-          if [ -d "ios/App" ]; then
+          if [ -f "ios/App/Podfile" ]; then
             cd ios/App && pod install
-          elif [ -d "ios" ]; then
+          elif [ -f "ios/Podfile" ]; then
             cd ios && pod install
           fi
 
